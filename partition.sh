@@ -30,8 +30,8 @@ simulate_partition() {
 
 # Check arguments
 if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 <node_name> <network1> <network2> [duration]"
-    echo "Example: $0 node5 network1 network2 30"
+    echo "Usage: $0 <node_name> <network> [duration]"
+    echo "Example: $0 node5 network2 30"
     exit 1
 fi
 
