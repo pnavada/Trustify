@@ -1,0 +1,187 @@
+blockchain_settings:
+  block_size: 4
+  target_hash: "0000"
+  block_confirmation_depth: 6
+  mining_reward: 50
+  review_reward: 10
+  reward_half_time: 100
+  mining_timeout: 25
+  protocols:
+    get_blocks:
+      timeout: 5
+transaction_tiers:
+  "1": 10
+  "2": 5
+  "3": 2
+genesis_block:
+  block_hash: 00000000b4d5c50efadb20ff99f46578b59ce279
+  previous_hash: 0000abcd
+  nonce: 0
+  target_hash: 0001abcd
+  timestamp: 0
+  merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
+  transaction_count: 10
+  transactions:
+    - type: coinbase
+      outputs:
+        - id: block_hash_1
+          address: address1
+          amount: 50
+        - id: block_hash_2
+          address: address2
+          amount: 50
+        - id: block_hash_3
+          address: address3
+          amount: 50
+        - id: block_hash_4
+          address: address4
+          amount: 50
+        - id: block_hash_5
+          address: address5
+          amount: 50
+        - id: block_hash_6
+          address: address6
+          amount: 50
+        - id: block_hash_7
+          address: address7
+          amount: 50
+        - id: block_hash_8
+          address: address8
+          amount: 50
+        - id: block_hash_9
+          address: address9
+          amount: 50
+        - id: block_hash_10
+          address: address10
+          amount: 50
+nodes:
+  node1:
+    wallet:
+      bitcoin_address: address1
+      public_key: public_1
+      private_key: secret_1
+    transactions:
+      - type: purchase
+        delay: 1
+        buyer_address: address1
+        seller_address: address2
+        product_id: product1
+        priority: 1
+      - type: purchase
+        delay: 2
+        buyer_address: address3
+        seller_address: address4
+        product_id: product2
+        priority: 2
+      - type: review
+        delay: 10
+        reviewer_address: address1
+        product_id: product1
+        rating: 5
+      - type: review
+        delay: 11
+        reviewer_address: address1
+        product_id: product2
+        rating: 3
+      - type: review
+        delay: 25
+        reviewer_address: address1
+        product_id: product5
+        rating: 5
+  node2:
+    wallet:
+      bitcoin_address: address2
+      public_key: public_2
+      private_key: secret_2
+    crash:
+      - timeout: "30"
+    transactions:
+      - type: review
+        delay: 15
+        reviewer_address: address2
+        product_id: product3
+        rating: 4
+      - type: review
+        delay: 16
+        reviewer_address: address4
+        product_id: product2
+        rating: 1
+      - type: purchase
+        delay: 3
+        buyer_address: address2
+        seller_address: address3
+        product_id: product3
+        priority: 3
+      - type: purchase
+        delay: 4
+        buyer_address: address4
+        seller_address: address1
+        product_id: product2
+        priority: 2
+  node3:
+    wallet:
+      bitcoin_address: address3
+      public_key: public_3
+      private_key: secret_3
+    transactions:
+      - type: review
+        delay: 20
+        reviewer_address: address1
+        product_id: product4
+        rating: 5
+      - type: review
+        delay: 21
+        reviewer_address: address3
+        product_id: product5
+        rating: 2
+      - type: review
+        delay: 41
+        reviewer_address: address3
+        product_id: product5
+        rating: 5
+      - type: purchase
+        delay: 5
+        buyer_address: address1
+        seller_address: address2
+        product_id: product4
+        priority: 1
+      - type: purchase
+        delay: 6
+        buyer_address: address3
+        seller_address: address4
+        product_id: product5
+        priority: 2
+  node4:
+    wallet:
+      bitcoin_address: address4
+      public_key: public_4
+      private_key: secret_4
+    transactions:
+      - type: review
+        delay: 30
+        reviewer_address: address2
+        product_id: product6
+        rating: 4
+      - type: review
+        delay: 31
+        reviewer_address: address4
+        product_id: product5
+        rating: 3
+      - type: purchase
+        delay: 7
+        buyer_address: address2
+        seller_address: address3
+        product_id: product6
+        priority: 3
+      - type: purchase
+        delay: 8
+        buyer_address: address4
+        seller_address: address1
+        product_id: product5
+        priority: 2
+  node5:
+    byzentine: true
+    wallet:
+      bitcoin_address: address5
+      public_key: public_5
+      private_key: secret_5
