@@ -9,15 +9,11 @@ blockchain_settings:
   protocols:
     get_blocks:
       timeout: 5
-transaction_tiers:
-  "1": 10
-  "2": 5
-  "3": 2
 genesis_block:
   block_hash: 00000000b4d5c50efadb20ff99f46578b59ce279
   previous_hash: 0000abcd
   nonce: 0
-  target_hash: 0001abcd
+  target_hash: 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
   timestamp: 0
   merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
   transaction_count: 10
@@ -66,13 +62,13 @@ nodes:
         buyer_address: address1
         seller_address: address2
         product_id: product1
-        priority: 1
+        fee: 10
       - type: purchase
         delay: 2
         buyer_address: address3
         seller_address: address4
         product_id: product2
-        priority: 2
+        fee: 5
       - type: review
         delay: 10
         reviewer_address: address1
@@ -111,13 +107,13 @@ nodes:
         buyer_address: address2
         seller_address: address3
         product_id: product3
-        priority: 3
+        fee: 2
       - type: purchase
         delay: 4
         buyer_address: address4
         seller_address: address1
         product_id: product2
-        priority: 2
+        fee: 5
   node3:
     wallet:
       bitcoin_address: address3
@@ -144,13 +140,13 @@ nodes:
         buyer_address: address1
         seller_address: address2
         product_id: product4
-        priority: 1
+        fee: 10
       - type: purchase
         delay: 6
         buyer_address: address3
         seller_address: address4
         product_id: product5
-        priority: 2
+        fee: 5
   node4:
     wallet:
       bitcoin_address: address4
@@ -172,13 +168,13 @@ nodes:
         buyer_address: address2
         seller_address: address3
         product_id: product6
-        priority: 3
+        fee: 2
       - type: purchase
         delay: 8
         buyer_address: address4
         seller_address: address1
         product_id: product5
-        priority: 2
+        fee: 5
   node5:
     byzentine: true
     wallet:
