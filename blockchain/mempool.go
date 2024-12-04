@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// Feel free to correct any mistakes or define new methods if needed
+
 type TransactionHeap []*UTXOTransaction
 
 func (th TransactionHeap) Len() int { return len(th) }

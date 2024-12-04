@@ -8,12 +8,14 @@ type Wallet struct {
 }
 
 func NewWallet(privateKey string) *Wallet {
-	// Generate wallet from private key
+	// The wallet is initialized with an empty list of UTXOs
+	// Other parameters are part of the configuration object
 	return nil
 }
 
 func (w *Wallet) GetBalance() int {
 	// Calculate balance from UTXOs
+	// Calculate balance from a list of UTXO transactions
 	return 0
 }
 

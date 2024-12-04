@@ -4,6 +4,7 @@ type Config struct {
 	BlockchainSettings ConfigBlockchainSettings
 	GenesisBlock       ConfigGenesisBlock
 	Nodes              map[string]ConfigNode // This would be an actual node later
+	peers              []string
 }
 
 type ConfigWallet struct {
@@ -64,7 +65,11 @@ type ConfigUTXOTransaction struct {
 	Amount  int
 }
 
+// Context - config.yml and this file
+
 func LoadConfig(path string) *Config {
-	// Load configuration from file
+	// Load configuration from file based on the structures here and get everything ready
+	// Identify the self hostname and load the node data accordingly and others go as list of peers
+	// The final output would be accurately filled config
 	return nil
 }

@@ -1,5 +1,7 @@
 package types
 
+// NOT IN USE YET
+
 type TransactionType string
 
 const (
