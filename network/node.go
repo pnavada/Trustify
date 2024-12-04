@@ -1,8 +1,18 @@
 package network
 
 import (
+	"bytes"
+	"os"
 	"trustify/blockchain"
 	"trustify/config"
+	"trustify/logger"
+
+	"context"
+
+	"log"
+
+	"github.com/libp2p/go-libp2p"
+
 )
 
 type Node struct {
@@ -12,7 +22,7 @@ type Node struct {
 	Mempool    *blockchain.Mempool
 	UTXOSet    *blockchain.UTXOSet
 	Miner      *blockchain.Miner
-	peers      []string
+	Peers      []string
 }
 
 // Context - blockchain package files
@@ -28,7 +38,55 @@ func NewNode(cfg *config.Config) *Node {
 	// The UTXOSet is initialized with the genesis block's transactions
 	// The miner is initialized with the node's blockchain and mempool
 	// The peers are the list of nodes except the host under the nodes section of the configuration
-	return nil
+
+	me, err := os.Hostname()
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to get hostname:", err)
+		return nil
+	}
+	cfgNode := cfg.Nodes[me]
+	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey), []byte(cfgNode.Wallet.PublicKey), []byte(cfgNode.Wallet.BitcoinAddress)) // Need to get self private key
+	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to initialize blockchain:", err)
+		return nil
+	}
+
+	mempool := blockchain.NewMempool()
+	utxoSet := blockchain.NewUTXOSet()
+
+	// Initialize UTXOSet with genesis block's transactions
+	for _, tx := range chain.Ledger[0].Transactions {
+		utxoSet.Add(tx) // TODO: create a copy of tx
+		if bytes.Equal(tx.Address, wallet.BitcoinAddress) {
+			wallet.UTXOs = append(wallet.UTXOs, tx)
+		}
+	}
+
+	miner := blockchain.NewMiner(chain, mempool)
+
+	// Initialize peers
+	var peers []string
+	for nodeName := range cfg.Nodes {
+		if nodeName != me {
+			peers = append(peers, nodeName)
+		}
+	}
+
+	node := &Node{
+		Config:     cfg,
+		Wallet:     wallet,
+		Blockchain: chain,
+		Mempool:    mempool,
+		UTXOSet:    utxoSet,
+		Miner:      miner,
+		Peers:      peers,
+	}
+
+	logger.InfoLogger.Printf("Node initialized: %+v\n", node)
+
+	// logger.InfoLogger.Println("Node initialized with address:", wallet.BitcoinAddress)
+	return node
 }
 
 func (n *Node) Start() {
@@ -37,18 +95,37 @@ func (n *Node) Start() {
 	// The node should create an outgoing connection to broadcast data over the network
 	// The nodes should start mining to add new blocks to blockchain
 	// Add additional methods or files as needed maintaining separation of concerns
+
+	// Start networking, transaction processing, mining
+	go n.listenForIncomingData()
+	go n.mineBlocks()
+	logger.InfoLogger.Println("Node started operations")
 }
 
 func (n *Node) BroadcastTransaction(tx blockchain.UTXOTransaction) {
 	// Broadcast transaction to the network
 	// Broadcast the transaction data over the network to all the peers
 	// do not use peer to peer multicasting instead use broadcasting
+
+	// Serialize and broadcast the transaction to peers
+    data := utils.SerializeTransaction(tx)
+    for _, peer := range n.Peers {
+        go n.sendDataToPeer(peer, data)
+    }
+    logger.InfoLogger.Println("Transaction broadcasted:", tx.ID)
 }
 
 func (n *Node) BroadcastBlock(block blockchain.Block) {
 	// Broadcast block to the network
 	// Broadcast the block data over the network to all peers
 	// do not use peer to peer multicasting instead use broadcasting
+
+	// Serialize and broadcast the block to peers
+    data := utils.SerializeBlock(block)
+    for _, peer := range n.Peers {
+        go n.sendDataToPeer(peer, data)
+    }
+    logger.InfoLogger.Println("Block broadcasted:", block.Header.BlockHash)
 }
 
 func (n *Node) HandleIncomingTransaction(tx blockchain.UTXOTransaction) error {
@@ -66,7 +143,21 @@ func (n *Node) HandleIncomingTransaction(tx blockchain.UTXOTransaction) error {
 	// If all the checks pass, the transaction is added to the memory pool.
 	// Add additional methods or files as needed maintaining separation of concerns
 
-	return nil
+	// Validate and add to mempool
+    if !tx.Verify() {
+        logger.ErrorLogger.Println("Invalid transaction signature:", tx.ID)
+        return ErrInvalidSignature
+    }
+
+    // Additional validation
+    if err := n.validateTransaction(tx); err != nil {
+        logger.ErrorLogger.Println("Transaction validation failed:", err)
+        return err
+    }
+
+    n.Mempool.AddTransaction(tx)
+    logger.InfoLogger.Println("Transaction added to mempool:", tx.ID)
+    return nil
 }
 
 func (n *Node) HandleIncomingBlock(block blockchain.Block) error {
@@ -77,5 +168,29 @@ func (n *Node) HandleIncomingBlock(block blockchain.Block) error {
 	// If not, then initiate the getBlocks protocol to figure out the missing blocks and act accordingly or weather to drop this block
 	// Add additional methods or files as needed maintaining separation of concerns
 
-	return nil
+	n.Mutex.Lock()
+    defer n.Mutex.Unlock()
+
+    // Validate block
+    if err := n.Blockchain.AddBlock(block); err != nil {
+        logger.ErrorLogger.Println("Failed to add incoming block:", err)
+        // Initiate GetBlocks protocol if necessary
+        return err
+    }
+
+    logger.InfoLogger.Println("Incoming block added to blockchain:", block.Header.BlockHash)
+    return nil
+}
+
+func (n *Node) mineBlocks() {
+    // Continuously attempt to mine new blocks
+    for {
+        block, err := n.Miner.MineBlock()
+        if err != nil {
+            logger.ErrorLogger.Println("Mining failed:", err)
+        } else if block != nil {
+            n.BroadcastBlock(block)
+        }
+        // Wait or check for new transactions before attempting next block
+    }
 }

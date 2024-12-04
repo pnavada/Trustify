@@ -13,178 +13,165 @@ genesis_block:
   block_hash: 00000000b4d5c50efadb20ff99f46578b59ce279
   previous_hash: 0000abcd
   nonce: 0
-  target_hash: 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-  timestamp: 0
+  target_hash: 00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+  timestamp: 1733339909
   merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
   transaction_count: 10
   transactions:
       outputs:
-        - id: block_hash_1
-          address: address1
+        - id: genesis_tx_0:0
+          address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
           amount: 50
-        - id: block_hash_2
-          address: address2
+        - id: genesis_tx_0:1
+          address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
           amount: 50
-        - id: block_hash_3
-          address: address3
+        - id: genesis_tx_0:2
+          address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
           amount: 50
-        - id: block_hash_4
-          address: address4
+        - id: genesis_tx_0:3
+          address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
           amount: 50
-        - id: block_hash_5
-          address: address5
+        - id: genesis_tx_0:4
+          address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
           amount: 50
-        - id: block_hash_6
-          address: address6
+        - id: genesis_tx_0:5
+          address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
           amount: 50
-        - id: block_hash_7
-          address: address7
+        - id: genesis_tx_0:6
+          address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
           amount: 50
-        - id: block_hash_8
-          address: address8
+        - id: genesis_tx_0:7
+          address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
           amount: 50
-        - id: block_hash_9
-          address: address9
+        - id: genesis_tx_0:8
+          address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
           amount: 50
-        - id: block_hash_10
-          address: address10
+        - id: genesis_tx_0:9
+          address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
           amount: 50
 nodes:
   node1:
     wallet:
-      bitcoin_address: address1
-      public_key: public_1
-      private_key: secret_1
+      bitcoin_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
+      public_key: 028a91bc3dfa9e0b0d7ea589d1778919a62f0f28ac98fbe914be803c917190d2fb2500b2d858beee3b829358a5a1ef11a679980ba87d1c13e326ff038a832c8c
+      private_key: f1c47a354d64d5edd4c993761dc89718336ccc0e6b5b5886dca766e0846b23b6
     transactions:
-      - type: purchase 
+      - type: purchase
         amount: 5
         delay: 1
-        buyer_address: address1
-        seller_address: address2
+        buyer_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
+        seller_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
         product_id: product1
         fee: 10
-      - type: purchase 
-        amount: 5
-        delay: 2
-        buyer_address: address3
-        seller_address: address4
-        product_id: product2
-        fee: 5
-      - type: review
-        delay: 10
-        reviewer_address: address1
-        product_id: product1
-        rating: 5
-      - type: review
-        delay: 11
-        reviewer_address: address1
-        product_id: product2
-        rating: 3
-      - type: review
-        delay: 25
-        reviewer_address: address1
-        product_id: product5
-        rating: 5
   node2:
     wallet:
-      bitcoin_address: address2
-      public_key: public_2
-      private_key: secret_2
-    crash:
-      - timeout: "30"
+      bitcoin_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+      public_key: eb64ee93351eed58ee8e43926a2aa2e529375be8b88175dc60d2997a5c15f31bbf1b7be3c6d5c89915d1d45b85931006aef0fb9c885de6e5a53c6cdcbab3230a
+      private_key: 7d599f0af9879d2a69e14217ec8c26865e0df11c68850206662d35a37e82acd2
     transactions:
-      - type: review
-        delay: 15
-        reviewer_address: address2
-        product_id: product3
-        rating: 4
-      - type: review
-        delay: 16
-        reviewer_address: address4
-        product_id: product2
-        rating: 1
-      - type: purchase 
+      - type: purchase
         amount: 5
         delay: 3
-        buyer_address: address2
-        seller_address: address3
+        buyer_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+        seller_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
         product_id: product3
         fee: 2
-      - type: purchase 
-        amount: 5
-        delay: 4
-        buyer_address: address4
-        seller_address: address1
-        product_id: product2
-        fee: 5
   node3:
     wallet:
-      bitcoin_address: address3
-      public_key: public_3
-      private_key: secret_3
+      bitcoin_address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
+      public_key: c0e315ccf0ecf5cbc604e9f967c4ab9b886c764dca8a32d62eee51c70685c049b794e31a39ea48f6c47a4d12dba405c23a0d4e98c851bc7812c216bc94b836c0
+      private_key: ddc03158e0bc4d6b47e7dbc281695e6bd65b64fe6337c2b147b6a11f5daad1bd
     transactions:
       - type: review
         delay: 20
-        reviewer_address: address1
+        reviewer_address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
         product_id: product4
         rating: 5
-      - type: review
-        delay: 21
-        reviewer_address: address3
-        product_id: product5
-        rating: 2
-      - type: review
-        delay: 41
-        reviewer_address: address3
-        product_id: product5
-        rating: 5
-      - type: purchase 
-        amount: 5
-        delay: 5
-        buyer_address: address1
-        seller_address: address2
-        product_id: product4
-        fee: 10
-      - type: purchase 
-        amount: 5
-        delay: 6
-        buyer_address: address3
-        seller_address: address4
-        product_id: product5
-        fee: 5
   node4:
     wallet:
-      bitcoin_address: address4
-      public_key: public_4
-      private_key: secret_4
+      bitcoin_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
+      public_key: fb71dba1fcc31248afe9707011bee944c5adc7da92d841527a06b9def58930a63c408ac430d581e2d58c3407bdb0d512618460677e200349258ca96d8945c445
+      private_key: c52916aa2c96b2befec0870eba3f2a0319bce01da696b47336e836c4159d15e4
     transactions:
-      - type: review
-        delay: 30
-        reviewer_address: address2
-        product_id: product6
-        rating: 4
-      - type: review
-        delay: 31
-        reviewer_address: address4
-        product_id: product5
-        rating: 3
-      - type: purchase 
-        amount: 5
-        delay: 7
-        buyer_address: address2
-        seller_address: address3
-        product_id: product6
-        fee: 2
-      - type: purchase 
+      - type: purchase
         amount: 5
         delay: 8
-        buyer_address: address4
-        seller_address: address1
+        buyer_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
+        seller_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
         product_id: product5
         fee: 5
   node5:
-    byzentine: true
     wallet:
-      bitcoin_address: address5
-      public_key: public_5
-      private_key: secret_5
+      bitcoin_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
+      public_key: f45bc9a3ed23b9c72a5949ad34d2aefc5ed7da34bde4bc7a1235f1b4c72312341f412e123c412ae84c562e8f5a34124bc623cd7e5df13e6b4123cf
+      private_key: 5d7c5a4a1234123cd4f7da341bcd1342cd5d4b7c412e8fa
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 7
+        buyer_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
+        seller_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+        product_id: product6
+        fee: 2
+  node6:
+    wallet:
+      bitcoin_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
+      public_key: 120abc423fcb9e0d8a6b5e7a1234b8d23ce76fda9b582e842142e3cdba9f342412a9e234
+      private_key: 9bc4e89241dfac234eb5829428bd3241fc89241dcef34a9234cd19b2e7dc2134
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 12
+        buyer_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
+        seller_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
+        product_id: product7
+        fee: 3
+  node7:
+    wallet:
+      bitcoin_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
+      public_key: 99bc4e76d23abc9e67d123b582a124fc8d1234234f67bc892a123dcbf8b34298d5a9a123
+      private_key: 87623bcfd342a76e8941abc124cd89f723d21a8bc142f392abc721a9342bdc9
+    transactions:
+      - type: review
+        delay: 15
+        reviewer_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
+        product_id: product8
+        rating: 4
+  node8:
+    wallet:
+      bitcoin_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+      public_key: 10cd76a3bfc421abc2d874f892d1a8e76b1234d8a92c42f3e5dcbf67d19abc21
+      private_key: 231cd8f89abc76d5e92a21ab341dcbf9e8a1234cd789fa123cbf84d23c9b7d
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 14
+        buyer_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+        seller_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
+        product_id: product9
+        fee: 2
+  node9:
+    wallet:
+      bitcoin_address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
+      public_key: 54bcd123dfc72e76ab1234f9d21abc8f3e9ab124f89dc76ea92b3428c9dc5b21
+      private_key: 231cd8a23bcf78d9ea23f89b342dc5e98a1d342b781fc8a923cd34b81f2a3d
+    transactions:
+      - type: review
+        delay: 18
+        reviewer_address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
+        product_id: product10
+        rating: 5
+  node10:
+    wallet:
+      bitcoin_address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
+      public_key: a567bc123d9ea23cd78921b324df6f812cba23df84b9dc67e342a891bc5f91a3
+      private_key: 8abc23df678ea9bc542b31dfc8a134bd76e98f91cd7e2a45b23189a2f5b7e9a
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 19
+        buyer_address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
+        seller_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
+        product_id: product11
+        fee: 3
+

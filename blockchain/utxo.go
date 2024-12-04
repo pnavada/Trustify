@@ -1,5 +1,10 @@
 package blockchain
 
+import (
+	"fmt"
+	"trustify/logger"
+)
+
 type UTXOTransaction struct {
 	ID      UTXOTransactionID
 	Address []byte
@@ -31,27 +36,68 @@ type UTXOSet struct {
 
 func NewUTXOSet() *UTXOSet {
 	// Initialize UTXO set
-	return nil
+	return &UTXOSet{UTXOs: make(map[string]*UTXOTransaction)}
 }
 
-func (u *UTXOSet) Add(utxo UTXOTransaction) {
+// Helper method to convert UTXOTransactionID to string
+func (id UTXOTransactionID) String() string {
+    return fmt.Sprintf("%x:%d", id.BlockHash, id.TxIndex)
+}
+
+func (u *UTXOSet) Add(utxo *UTXOTransaction) {
 	// Add a UXTO transaction to the set
 	// Make sure the transaction is unique
 	// There cannot be duplocates in a set!
 	// Return a boolean indicating success or failure
+	u.Mutex.Lock()
+    defer u.Mutex.Unlock()
+    key := utxo.ID.String()
+    if _, exists := u.UTXOs[key]; exists {
+        logger.ErrorLogger.Println("UTXO already exists:", key)
+        return false
+    }
+    u.UTXOs[key] = &utxo
+    logger.InfoLogger.Println("UTXO added:", key)
+    return true
 }
 
 func (u *UTXOSet) Remove(id UTXOTransactionID) {
 	// Remove the transaction from the set
 	// Return a boolean indicating success or failure
+	u.Mutex.Lock()
+    defer u.Mutex.Unlock()
+    key := id.String()
+    if _, exists := u.UTXOs[key]; !exists {
+        logger.ErrorLogger.Println("UTXO not found:", key)
+        return false
+    }
+    delete(u.UTXOs, key)
+    logger.InfoLogger.Println("UTXO removed:", key)
+    return true
 }
 
-func (u *UTXOSet) Get(id UTXOTransactionID) (UTXOTransaction, bool) {
+func (u *UTXOSet) Get(id *UTXOTransactionID) (*UTXOTransaction, bool) {
 	// Get the transaction
-	return UTXOTransaction{}, false
+	u.Mutex.Lock()
+    defer u.Mutex.Unlock()
+    key := id.String()
+    utxo, exists := u.UTXOs[key]
+    if !exists {
+        logger.ErrorLogger.Println("UTXO not found:", key)
+        return nil, false
+    }
+    return utxo, true
 }
 
-func (u *UTXOSet) GetAllForAddress(address []byte) []UTXOTransaction {
+func (u *UTXOSet) GetAllForAddress(address []byte) []*UTXOTransaction {
 	// Get all transcations for the specified address
-	return nil
+	u.Mutex.Lock()
+    defer u.Mutex.Unlock()
+    var utxos []*UTXOTransaction
+    for _, utxo := range u.UTXOs {
+        if bytes.Equal(utxo.Address, address) {
+            utxos = append(utxos, utxo)
+        }
+    }
+    return utxos
 }

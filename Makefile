@@ -12,9 +12,9 @@ test1: build
 	@sleep 30
 	
 	@echo "Starting network partitions"
-	@bash ./partition.sh node5 trustify_network2 30 & \
-	 bash ./partition.sh node6 trustify_network1 30 & \
-	 wait
+	# @bash ./partition.sh node5 trustify_network2 30 & \
+	#  bash ./partition.sh node6 trustify_network1 30 & \
+	#  wait
 	
 
 .PHONY: down-test1
