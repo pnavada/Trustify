@@ -6,6 +6,16 @@ import (
 	"sync"
 )
 
+type InboundMessage struct {
+	Data   []byte
+	Sender net.Addr
+}
+
+type OutboundMessage struct {
+	Data      []byte
+	Recipient net.Addr
+}
+
 type ConnectionType int
 
 const (

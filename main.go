@@ -19,8 +19,9 @@ func main() {
 	}
 
 	// // Proceed with initializing the node using cfg
-	network.NewNode(cfg)
-	// node.Start()
+	node := network.NewNode(cfg)
+	
+	node.Start()
 
 	// // Step 4: Set up graceful shutdown handling.
 	// stop := make(chan os.Signal, 1)

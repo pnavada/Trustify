@@ -59,57 +59,59 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 	// Make sure the addition of the block is an atomic operation—either fully added or not at all, to maintain blockchain integrity.
 	
 	// Validate the block structure
-    if b == nil || len(b.Transactions) == 0 {
-        logger.ErrorLogger.Println("Invalid block structure")
-        return ErrInvalidBlockHash
-    }
+    // if b == nil || len(b.Transactions) == 0 {
+    //     logger.ErrorLogger.Println("Invalid block structure")
+    //     return ErrInvalidBlockHash
+    // }
 
-    // Validate previous hash
-    lastBlock := bc.LatestBlock()
-    if !bytes.Equal(b.Header.PreviousHash, lastBlock.Header.BlockHash) {
-        logger.ErrorLogger.Println("Block's previous hash does not match the latest block's hash")
-        return ErrInvalidPreviousHash
-    }
+    // // Validate previous hash
+    // lastBlock := bc.LatestBlock()
+    // if !bytes.Equal(b.Header.PreviousHash, lastBlock.Header.BlockHash) {
+    //     logger.ErrorLogger.Println("Block's previous hash does not match the latest block's hash")
+    //     return ErrInvalidPreviousHash
+    // }
 
-    // Validate Merkle root
-    merkleRoot, err := crypto.ComputeMerkleRoot(b.Transactions)
-    if err != nil || !bytes.Equal(merkleRoot, b.Header.MerkleRoot) {
-        logger.ErrorLogger.Println("Invalid Merkle root")
-        return ErrInvalidMerkleRoot
-    }
+    // // Validate Merkle root
+    // merkleRoot, err := crypto.ComputeMerkleRoot(b.Transactions)
+    // if err != nil || !bytes.Equal(merkleRoot, b.Header.MerkleRoot) {
+    //     logger.ErrorLogger.Println("Invalid Merkle root")
+    //     return ErrInvalidMerkleRoot
+    // }
 
-    // Validate Proof of Work
-    blockHash := b.ComputeHash()
-    if bytes.Compare(blockHash, b.Header.TargetHash) > 0 {
-        logger.ErrorLogger.Println("Block does not meet the difficulty target")
-        return ErrInvalidBlockHash
-    }
+    // // Validate Proof of Work
+    // blockHash := b.ComputeHash()
+    // if bytes.Compare(blockHash, b.Header.TargetHash) > 0 {
+    //     logger.ErrorLogger.Println("Block does not meet the difficulty target")
+    //     return ErrInvalidBlockHash
+    // }
 
-    // Validate timestamp (e.g., within 2 hours of current time)
-    if b.Header.Timestamp > time.Now().Unix()+7200 {
-        logger.ErrorLogger.Println("Block timestamp is too far in the future")
-        return ErrInvalidTimestamp
-    }
+    // // Validate timestamp (e.g., within 2 hours of current time)
+    // if b.Header.Timestamp > time.Now().Unix()+7200 {
+    //     logger.ErrorLogger.Println("Block timestamp is too far in the future")
+    //     return ErrInvalidTimestamp
+    // }
 
-    // Validate transactions
-    for _, tx := range b.Transactions {
-        if !tx.Verify() {
-            logger.ErrorLogger.Println("Invalid transaction detected")
-            return ErrTransactionInvalid
-        }
-        // Additional validation for UTXO, double-spending, reviews, etc.
-        if err := bc.validateTransaction(tx); err != nil {
-            logger.ErrorLogger.Println("Transaction validation failed:", err)
-            return err
-        }
-    }
+    // // Validate transactions
+    // for _, tx := range b.Transactions {
+    //     if !tx.Verify() {
+    //         logger.ErrorLogger.Println("Invalid transaction detected")
+    //         return ErrTransactionInvalid
+    //     }
+    //     // Additional validation for UTXO, double-spending, reviews, etc.
+    //     if err := bc.validateTransaction(tx); err != nil {
+    //         logger.ErrorLogger.Println("Transaction validation failed:", err)
+    //         return err
+    //     }
+    // }
 
-    // Append block to ledger
-    bc.Ledger = append(bc.Ledger, b)
-    logger.InfoLogger.Println("Block added to blockchain:", b.Header.BlockHash)
+    // // Append block to ledger
+    // bc.Ledger = append(bc.Ledger, b)
+    // logger.InfoLogger.Println("Block added to blockchain:", b.Header.BlockHash)
 
-    // Update UTXOSet
-    bc.updateUTXOSet(b)
+    // // Update UTXOSet
+    // bc.updateUTXOSet(b)
+    // return nil
+
     return nil
 }
 
@@ -120,25 +122,29 @@ func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
 	// If no block is found with the given hash, return a meaningful error indicating that the block does not exist.
 	// Ensure that the retrieved block is valid within the context of the current chain state (e.g., hasn’t been replaced by a fork).
 	
-	for _, block := range bc.Ledger {
-        if bytes.Equal(block.Header.BlockHash, hash) {
-            logger.InfoLogger.Println("Block found for hash:", hash)
-            return block, nil
-        }
-    }
-    logger.ErrorLogger.Println("Block not found for hash:", hash)
-    return nil, ErrBlockNotFound
+	// for _, block := range bc.Ledger {
+    //     if bytes.Equal(block.Header.BlockHash, hash) {
+    //         logger.InfoLogger.Println("Block found for hash:", hash)
+    //         return block, nil
+    //     }
+    // }
+    // logger.ErrorLogger.Println("Block not found for hash:", hash)
+    // return nil, ErrBlockNotFound
+
+    return nil, nil
 }
 
 func (bc *Blockchain) LatestBlock() *Block {
 	// Retrieve the last block added to the blockchain, which represents the current state of the ledger.
 	// If the blockchain is empty (e.g., no blocks have been added), return nil.
 	
-	if len(bc.Ledger) == 0 {
-        logger.ErrorLogger.Println("Blockchain is empty")
-        return nil
-    }
-    return bc.Ledger[len(bc.Ledger)-1]
+	// if len(bc.Ledger) == 0 {
+    //     logger.ErrorLogger.Println("Blockchain is empty")
+    //     return nil
+    // }
+    // return bc.Ledger[len(bc.Ledger)-1]
+
+    return nil
 }
 
 // Add a method to identify committed blocks and transactions based on the confirmation depth available from the configuration

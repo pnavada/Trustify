@@ -6,13 +6,10 @@ import (
 	"trustify/blockchain"
 	"trustify/config"
 	"trustify/logger"
-
-	"context"
-
-	"log"
-
-	"github.com/libp2p/go-libp2p"
-
+	"net"
+	"fmt"
+	"io"
+	"time"
 )
 
 type Node struct {
@@ -23,6 +20,9 @@ type Node struct {
 	UTXOSet    *blockchain.UTXOSet
 	Miner      *blockchain.Miner
 	Peers      []string
+	TCPEgress  *ConnectionPool
+	ReadChannel  chan InboundMessage
+	WriteChannel chan OutboundMessage
 }
 
 // Context - blockchain package files
@@ -81,6 +81,9 @@ func NewNode(cfg *config.Config) *Node {
 		UTXOSet:    utxoSet,
 		Miner:      miner,
 		Peers:      peers,
+		TCPEgress: NewTCPConnectionPool(8080, Outgoing),
+		ReadChannel:  make(chan InboundMessage),
+		WriteChannel: make(chan OutboundMessage),
 	}
 
 	logger.InfoLogger.Printf("Node initialized: %+v\n", node)
@@ -97,9 +100,96 @@ func (n *Node) Start() {
 	// Add additional methods or files as needed maintaining separation of concerns
 
 	// Start networking, transaction processing, mining
-	go n.listenForIncomingData()
-	go n.mineBlocks()
+	go n.ListenForTCPConnections()
+
+	time.Sleep(5 * time.Second)
+
+	// TEST
+	for _, peer := range n.Peers {
+		go n.SendMessageToHost(peer, []byte("hello"))
+	}
+
+	n.HandleMessages()
+
+	// go n.mineBlocks()
 	logger.InfoLogger.Println("Node started operations")
+}
+
+// Network communication
+func (n *Node) ListenForTCPConnections() {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", 8080))
+	if err != nil {
+		fmt.Println("Error starting TCP listener:", err)
+		return
+	}
+	defer listener.Close()
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection:", err)
+			continue
+		}
+		// n.TCPIngress.Add(conn.RemoteAddr(), conn)
+		go n.HandleTCPConnection(conn)
+	}
+}
+
+func (node *Node) HandleTCPConnection(conn net.Conn) {
+	defer conn.Close()
+	buffer := make([]byte, 1024)
+
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			if err != io.EOF {
+				fmt.Println("Error reading from TCP connection:", err)
+			}
+			break
+		}
+		node.ReadChannel <- InboundMessage{
+			Data:   buffer[:n],
+			Sender: conn.RemoteAddr(),
+		}
+	}
+}
+
+func (node *Node) SendMessageToHost(host string, data []byte) {
+	addr, err := GetAddrFromHostname(host)
+	if err != nil {
+		fmt.Printf("error resolving address for host %s: %v\n", host, err)
+		return
+	}
+
+	node.WriteChannel <- OutboundMessage{
+		Data:      data,
+		Recipient: addr,
+	}
+}
+
+func GetAddrFromHostname(hostname string) (net.Addr, error) {
+	addrs, err := net.LookupIP(hostname)
+	if err != nil {
+		return nil, err
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("no addresses found for hostname: %s", hostname)
+	}
+	return &net.TCPAddr{IP: addrs[0]}, nil
+}
+
+func (n *Node) HandleMessages() {
+	for {
+		select {
+		case inboundMessage := <-n.ReadChannel:
+			// Handle incoming message
+			fmt.Println("Received message:", string(inboundMessage.Data))
+		case outboundMessage := <-n.WriteChannel:
+			conn, _ := n.TCPEgress.Get(outboundMessage.Recipient)
+			tcpConn := conn.(net.Conn)
+			tcpConn.Write(outboundMessage.Data)
+		}
+	}
 }
 
 func (n *Node) BroadcastTransaction(tx blockchain.UTXOTransaction) {
@@ -108,11 +198,11 @@ func (n *Node) BroadcastTransaction(tx blockchain.UTXOTransaction) {
 	// do not use peer to peer multicasting instead use broadcasting
 
 	// Serialize and broadcast the transaction to peers
-    data := utils.SerializeTransaction(tx)
-    for _, peer := range n.Peers {
-        go n.sendDataToPeer(peer, data)
-    }
-    logger.InfoLogger.Println("Transaction broadcasted:", tx.ID)
+    // data := utils.SerializeTransaction(tx)
+    // for _, peer := range n.Peers {
+    //     go n.sendDataToPeer(peer, data)
+    // }
+    // logger.InfoLogger.Println("Transaction broadcasted:", tx.ID)
 }
 
 func (n *Node) BroadcastBlock(block blockchain.Block) {
@@ -121,11 +211,11 @@ func (n *Node) BroadcastBlock(block blockchain.Block) {
 	// do not use peer to peer multicasting instead use broadcasting
 
 	// Serialize and broadcast the block to peers
-    data := utils.SerializeBlock(block)
-    for _, peer := range n.Peers {
-        go n.sendDataToPeer(peer, data)
-    }
-    logger.InfoLogger.Println("Block broadcasted:", block.Header.BlockHash)
+    // data := utils.SerializeBlock(block)
+    // for _, peer := range n.Peers {
+    //     go n.sendDataToPeer(peer, data)
+    // }
+    // logger.InfoLogger.Println("Block broadcasted:", block.Header.BlockHash)
 }
 
 func (n *Node) HandleIncomingTransaction(tx blockchain.UTXOTransaction) error {
@@ -143,20 +233,20 @@ func (n *Node) HandleIncomingTransaction(tx blockchain.UTXOTransaction) error {
 	// If all the checks pass, the transaction is added to the memory pool.
 	// Add additional methods or files as needed maintaining separation of concerns
 
-	// Validate and add to mempool
-    if !tx.Verify() {
-        logger.ErrorLogger.Println("Invalid transaction signature:", tx.ID)
-        return ErrInvalidSignature
-    }
+	// // Validate and add to mempool
+    // if !tx.Verify() {
+    //     logger.ErrorLogger.Println("Invalid transaction signature:", tx.ID)
+    //     return ErrInvalidSignature
+    // }
 
-    // Additional validation
-    if err := n.validateTransaction(tx); err != nil {
-        logger.ErrorLogger.Println("Transaction validation failed:", err)
-        return err
-    }
+    // // Additional validation
+    // if err := n.validateTransaction(tx); err != nil {
+    //     logger.ErrorLogger.Println("Transaction validation failed:", err)
+    //     return err
+    // }
 
-    n.Mempool.AddTransaction(tx)
-    logger.InfoLogger.Println("Transaction added to mempool:", tx.ID)
+    // n.Mempool.AddTransaction(tx)
+    // logger.InfoLogger.Println("Transaction added to mempool:", tx.ID)
     return nil
 }
 
@@ -168,29 +258,29 @@ func (n *Node) HandleIncomingBlock(block blockchain.Block) error {
 	// If not, then initiate the getBlocks protocol to figure out the missing blocks and act accordingly or weather to drop this block
 	// Add additional methods or files as needed maintaining separation of concerns
 
-	n.Mutex.Lock()
-    defer n.Mutex.Unlock()
+	// n.Mutex.Lock()
+    // defer n.Mutex.Unlock()
 
-    // Validate block
-    if err := n.Blockchain.AddBlock(block); err != nil {
-        logger.ErrorLogger.Println("Failed to add incoming block:", err)
-        // Initiate GetBlocks protocol if necessary
-        return err
-    }
+    // // Validate block
+    // if err := n.Blockchain.AddBlock(block); err != nil {
+    //     logger.ErrorLogger.Println("Failed to add incoming block:", err)
+    //     // Initiate GetBlocks protocol if necessary
+    //     return err
+    // }
 
-    logger.InfoLogger.Println("Incoming block added to blockchain:", block.Header.BlockHash)
+    // logger.InfoLogger.Println("Incoming block added to blockchain:", block.Header.BlockHash)
     return nil
 }
 
 func (n *Node) mineBlocks() {
-    // Continuously attempt to mine new blocks
-    for {
-        block, err := n.Miner.MineBlock()
-        if err != nil {
-            logger.ErrorLogger.Println("Mining failed:", err)
-        } else if block != nil {
-            n.BroadcastBlock(block)
-        }
-        // Wait or check for new transactions before attempting next block
-    }
+    // // Continuously attempt to mine new blocks
+    // for {
+    //     block, err := n.Miner.MineBlock()
+    //     if err != nil {
+    //         logger.ErrorLogger.Println("Mining failed:", err)
+    //     } else if block != nil {
+    //         n.BroadcastBlock(block)
+    //     }
+    //     // Wait or check for new transactions before attempting next block
+    // }
 }
