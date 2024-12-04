@@ -1,5 +1,9 @@
 package crypto
 
+import (
+	"trustify/blockchain"
+)
+
 // Refer https://pkg.go.dev/github.com/wealdtech/go-merkletree#readme-maintainers
 
 type MerkleTree struct {
@@ -12,7 +16,7 @@ type MerkleNode struct {
 	Hash  []byte
 }
 
-func BuildTree(transactions []UXTOTransaction) (*MerkleTree, error) {
+func BuildTree(transactions []blockchain.UTXOTransaction) (*MerkleTree, error) {
 	// Method implementation goes here
 	return nil, nil
 }
@@ -22,7 +26,7 @@ func (mt *MerkleTree) GetRoot() []byte {
 	return nil
 }
 
-func (mt *MerkleTree) VerifyTransaction(tx Transaction, proof [][]byte) bool {
+func (mt *MerkleTree) VerifyTransaction(tx blockchain.UTXOTransaction, proof [][]byte) bool {
 	// Method implementation goes here
 	return false
 }

@@ -18,7 +18,6 @@ genesis_block:
   merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
   transaction_count: 10
   transactions:
-    - type: coinbase
       outputs:
         - id: block_hash_1
           address: address1
@@ -57,13 +56,15 @@ nodes:
       public_key: public_1
       private_key: secret_1
     transactions:
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 1
         buyer_address: address1
         seller_address: address2
         product_id: product1
         fee: 10
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 2
         buyer_address: address3
         seller_address: address4
@@ -102,13 +103,15 @@ nodes:
         reviewer_address: address4
         product_id: product2
         rating: 1
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 3
         buyer_address: address2
         seller_address: address3
         product_id: product3
         fee: 2
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 4
         buyer_address: address4
         seller_address: address1
@@ -135,13 +138,15 @@ nodes:
         reviewer_address: address3
         product_id: product5
         rating: 5
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 5
         buyer_address: address1
         seller_address: address2
         product_id: product4
         fee: 10
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 6
         buyer_address: address3
         seller_address: address4
@@ -163,13 +168,15 @@ nodes:
         reviewer_address: address4
         product_id: product5
         rating: 3
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 7
         buyer_address: address2
         seller_address: address3
         product_id: product6
         fee: 2
-      - type: purchase
+      - type: purchase 
+        amount: 5
         delay: 8
         buyer_address: address4
         seller_address: address1

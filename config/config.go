@@ -1,71 +1,67 @@
 package config
 
 type Config struct {
-	BlockchainSettings ConfigBlockchainSettings `yaml:"blockchain_settings"`
-	GenesisBlock       ConfigGenesisBlock       `yaml:"genesis_block"`
-	Nodes              map[string]ConfigNode    // This would be an actual node later
-	Transactions       []ConfigTransaction      `yaml:"transactions"`
+	BlockchainSettings ConfigBlockchainSettings
+	GenesisBlock       ConfigGenesisBlock
+	Nodes              map[string]ConfigNode // This would be an actual node later
 }
 
 type ConfigWallet struct {
-	BitcoinAddress string `yaml:"bitcoin_address"`
-	PublicKey      string `yaml:"public_key"`
-	PrivateKey     string `yaml:"private_key"`
+	BitcoinAddress string
+	PublicKey      string
+	PrivateKey     string
 }
 
 type ConfigTransaction struct {
-	Type            string `yaml:"type"`
-	Delay           int    `yaml:"delay"`
-	BuyerAddress    string `yaml:"buyer_address,omitempty"`
-	SellerAddress   string `yaml:"seller_address,omitempty"`
-	ProductID       string `yaml:"product_id,omitempty"`
-	Fee             int    `yaml:"fee,omitempty"`
-	ReviewerAddress string `yaml:"reviewer_address,omitempty"`
-	Rating          int    `yaml:"rating,omitempty"`
+	Type            string
+	Delay           int
+	BuyerAddress    string
+	SellerAddress   string
+	ProductID       string
+	Fee             int
+	ReviewerAddress string
+	Rating          int
+	Amount          int
 }
 
 type ConfigNode struct {
-	Wallet ConfigWallet `yaml:"wallet"`
+	Wallet       ConfigWallet
+	Transactions []ConfigTransaction
 }
 
 type ConfigBlockchainSettings struct {
-	BlockSize              int            `yaml:"block_size"`
-	TargetHash             string         `yaml:"target_hash"`
-	BlockConfirmationDepth int            `yaml:"block_confirmation_depth"`
-	MiningReward           int            `yaml:"mining_reward"`
-	ReviewReward           int            `yaml:"review_reward"`
-	RewardHalfTime         int            `yaml:"reward_half_time"`
-	Protocols              ConfigProtocol `yaml:"protocols"`
+	BlockSize              int
+	TargetHash             string
+	BlockConfirmationDepth int
+	MiningReward           int
+	ReviewReward           int
+	RewardHalfTime         int
+	Protocols              ConfigProtocol
 }
 
 type ConfigProtocol struct {
-	GetBlocks ConfigGetBlocksProtocol `yaml:"get_blocks"`
+	GetBlocks ConfigGetBlocksProtocol
 }
 
 type ConfigGetBlocksProtocol struct {
-	Timeout int `yaml:"timeout"`
+	Timeout int
 }
 
 type ConfigGenesisBlock struct {
-	BlockHash        string                `yaml:"block_hash"`
-	PreviousHash     string                `yaml:"previous_hash"`
-	Nonce            int                   `yaml:"nonce"`
-	TargetHash       string                `yaml:"target_hash"`
-	Timestamp        int                   `yaml:"timestamp"`
-	MerkleRoot       string                `yaml:"merkle_root"`
-	TransactionCount int                   `yaml:"transaction_count"`
-	Transactions     []ConfigGenesisOutput `yaml:"transactions"`
+	BlockHash        string
+	PreviousHash     string
+	Nonce            int
+	TargetHash       string
+	Timestamp        int
+	MerkleRoot       string
+	TransactionCount int
+	Transactions     []ConfigUTXOTransaction
 }
 
-type ConfigGenesisOutput struct {
-	Type    string             `yaml:"type"`
-	Outputs []ConfigUTXOOutput `yaml:"outputs"`
-}
-
-type ConfigUTXOOutput struct {
-	ID      string `yaml:"id"`
-	Address string `yaml:"address"`
-	Amount  int    `yaml:"amount"`
+type ConfigUTXOTransaction struct {
+	ID      string
+	Address string
+	Amount  int
 }
 
 func LoadConfig(path string) *Config {
