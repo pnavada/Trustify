@@ -64,7 +64,7 @@ func NewNode(cfg *config.Config) *Node {
 		}
 	}
 
-	miner := blockchain.NewMiner(chain, mempool)
+	miner := blockchain.NewMiner(chain, mempool, wallet)
 
 	// Initialize peers
 	var peers []string
@@ -155,7 +155,7 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 			tx.Fee,
 			tx.ProductID,
 		)
-		if transaction == nil {
+		if err != nil {
 			logger.ErrorLogger.Println("Failed to create purchase transaction")
 			return
 		}
@@ -168,7 +168,7 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 			tx.ProductID,
 			tx.Rating,
 		)
-		if transaction == nil {
+		if err != nil {
 			logger.ErrorLogger.Println("Failed to create review transaction")
 			return
 		}
@@ -340,17 +340,4 @@ func (n *Node) HandleIncomingBlock(block *blockchain.Block) error {
 
 	// logger.InfoLogger.Println("Incoming block added to blockchain:", block.Header.BlockHash)
 	return nil
-}
-
-func (n *Node) mineBlocks() {
-	// // Continuously attempt to mine new blocks
-	// for {
-	//     block, err := n.Miner.MineBlock()
-	//     if err != nil {
-	//         logger.ErrorLogger.Println("Mining failed:", err)
-	//     } else if block != nil {
-	//         n.BroadcastBlock(block)
-	//     }
-	//     // Wait or check for new transactions before attempting next block
-	// }
 }
