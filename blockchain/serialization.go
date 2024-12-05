@@ -2,7 +2,9 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
+	"trustify/logger"
 )
 
 func SerializeTransaction(tx *UTXOTransaction) []byte {
@@ -34,7 +36,14 @@ func DeserializeBlock(data []byte) *Block {
 }
 
 func HashObject(serializedData []byte) []byte {
-    hash := sha256.Sum256(serializedData)
-    logger.InfoLogger.Println("Computed hash for block:", hash[:])
-    return hash[:]
+	hash := sha256.Sum256(serializedData)
+	logger.InfoLogger.Println("Computed hash for block:", hash[:])
+	return hash[:]
+}
+
+func Serialize(data interface{}) []byte {
+	var buff bytes.Buffer
+	enc := gob.NewEncoder(&buff)
+	enc.Encode(data)
+	return buff.Bytes()
 }
