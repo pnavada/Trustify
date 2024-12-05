@@ -32,3 +32,9 @@ func DeserializeBlock(data []byte) *Block {
 	dec.Decode(&b)
 	return &b
 }
+
+func HashObject(serializedData []byte) []byte {
+    hash := sha256.Sum256(serializedData)
+    logger.InfoLogger.Println("Computed hash for block:", hash[:])
+    return hash[:]
+}

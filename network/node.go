@@ -93,6 +93,22 @@ func NewNode(cfg *config.Config) *Node {
 	return node
 }
 
+func (n *Node) StartMining() {
+	for {
+		blockSize = cfg.BlockchainSettings.BlockSize
+		if n.Mempool.Transactions.Len() >= blockSize {
+			block = n.miner.MineBlock(blockSize)
+			n.BroadcastBlock(block)
+		}
+	}
+}
+
+func (n *Node) CommitBlocks() {
+	for {
+
+	}
+}
+
 func (n *Node) Start() {
 	// Start node operations: networking, transaction processing, mining - concurrent
 	// A node should start listening for incoming transactions and blocks on a specified port
@@ -103,7 +119,7 @@ func (n *Node) Start() {
 	// Start networking, transaction processing, mining
 	go n.ListenForTCPConnections()
 	time.Sleep(5 * time.Second)
-	go n.mineBlocks()
+	go n.StartMining()
 
 	// TEST
 	for _, peer := range n.Peers {
@@ -114,6 +130,7 @@ func (n *Node) Start() {
 	for _, tx := range n.Config.Transactions {
 		go n.handleConfigTransaction(tx)
 	}
+	go n.CommitBlocks()
 
 	n.HandleMessages()
 }
