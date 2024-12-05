@@ -186,9 +186,17 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 	// Print the constructed transaction
 	logger.InfoLogger.Printf("Constructed transaction: %+v", transaction)
 
-	// TODO Validate and add the transaction to the mempool
-	// TODO Broadcast the transaction to the network
+	// Validate the transaction
+	if err := n.Blockchain.ValidateTransaction(transaction, n.UTXOSet); err != nil {
+		logger.ErrorLogger.Println("Transaction validation failed:", err)
+		return
+	}
 
+	// Add the transaction to the mempool
+	n.Mempool.AddTransaction(transaction)
+
+	// Broadcast the transaction to the network
+	n.BroadcastTransaction(*transaction)
 }
 
 // Network communication
@@ -275,7 +283,7 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 	// Serialize and broadcast the block to peers
 	// data := utils.SerializeBlock(block)
 	// for _, peer := range n.Peers {
-	//     go n.sendDataToPeer(peer, data)
+	// 	go n.sendDataToPeer(peer, data)
 	// }
 	// logger.InfoLogger.Println("Block broadcasted:", block.Header.BlockHash)
 }

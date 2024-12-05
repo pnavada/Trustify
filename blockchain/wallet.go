@@ -23,18 +23,12 @@ func NewWallet(privateKey []byte, publicKey []byte, bitcoinAddress []byte) *Wall
 func (w *Wallet) GetBalance() int {
 	// Calculate balance from UTXOs
 	// Calculate balance from a list of UTXO transactions
-	// balance := 0
-	// for _, utxo := range w.UTXOs {
-	//     balance += utxo.Amount
-	// }
-	// logger.InfoLogger.Println("Wallet balance calculated:", balance)
-	// return balance
-	return 0
-}
-
-func (w *Wallet) SignTransaction(tx *UTXOTransaction) {
-	// TODO
-	// return crypto.Sign(tx, w.PrivateKey)
+	balance := 0
+	for _, utxo := range w.UTXOs {
+		balance += utxo.Amount
+	}
+	logger.InfoLogger.Println("Wallet balance calculated:", balance)
+	return balance
 }
 
 func (w *Wallet) CreateInputs(amount int) ([]*UTXOTransaction, int, error) {
