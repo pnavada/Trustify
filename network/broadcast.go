@@ -117,7 +117,7 @@ func computeBroadcastAddress(ipNet *net.IPNet) net.IP {
 }
 
 // ReceiveMessages listens for UDP broadcast messages on the global port.
-func ReceiveMessages() error {
+func ReceiveMessages(readChannel chan InboundMessage) error {
 	// Listen on all interfaces for UDP messages on the specified port
 	addr := fmt.Sprintf(":%d", Port)
 	conn, err := net.ListenPacket("udp", addr)
@@ -141,39 +141,7 @@ func ReceiveMessages() error {
 			continue
 		}
 
-		// Handle the received message in a separate goroutine
-		go handleReceivedMessage(buffer[:n], remoteAddr)
-	}
-}
-
-// handleReceivedMessage processes the received message based on its type.
-func handleReceivedMessage(data []byte, remoteAddr net.Addr) {
-	if len(data) == 0 {
-		return
-	}
-
-	messageType := data[0]
-	payload := data[1:]
-
-	switch messageType {
-	case MessageTypeTransaction:
-		tx := blockchain.DeserializeTransaction(payload)
-		if tx == nil {
-			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n", remoteAddr)
-			return
-		}
-		// Process the transaction
-		processTransaction(tx, remoteAddr)
-	case MessageTypeBlock:
-		block := blockchain.DeserializeBlock(payload)
-		if block == nil {
-			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n", remoteAddr)
-			return
-		}
-		// Process the block
-		processBlock(block, remoteAddr)
-	default:
-		logger.ErrorLogger.Printf("Unknown message type %d from %s\n", messageType, remoteAddr)
+		readChannel <- InboundMessage{Data: buffer[:n], Sender: remoteAddr}
 	}
 }
 
@@ -255,20 +223,7 @@ func SendBlock(block *blockchain.Block) error {
 	return BroadcastMessage(buf.Bytes())
 }
 
-// processTransaction handles a received transaction.
-func processTransaction(tx *blockchain.Transaction, remoteAddr net.Addr) {
-	logger.InfoLogger.Printf("Received transaction %x from %s\n", tx.ID, remoteAddr)
-	// TODO: Add transaction validation and processing logic here
-}
-
-// processBlock handles a received block.
-func processBlock(block *blockchain.Block, remoteAddr net.Addr) {
-	logger.InfoLogger.Printf("Received block %x from %s\n", block, remoteAddr)
-	// TODO: Add block validation and processing logic here
-}
-
 // Utility functions for reading and writing variable length bytes
-
 func writeVarBytes(w *bytes.Buffer, data []byte) error {
 	length := uint64(len(data))
 	err := binary.Write(w, binary.BigEndian, length)
