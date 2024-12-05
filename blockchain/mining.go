@@ -100,7 +100,7 @@ func (m *Miner) ProofOfWork(b *Block) {
 	nonce := int64(0)
 	for {
 		b.Header.Nonce = nonce
-		hash = b.ComputeHash()
+		hash = HashObject(Serialize(b))
 		if bytes.Compare(hash, b.Header.TargetHash) < 0 {
 			b.Header.BlockHash = hash
 			logger.InfoLogger.Println("Proof of Work successful with nonce:", nonce)
@@ -124,7 +124,7 @@ func (m *Miner) createCoinbaseTransaction(numBlocks int) *Transaction {
 		Address: m.Wallet.BitcoinAddress,
 		Amount:  m.Blockchain.MiningReward,
 	}
-	coinbaseTx.ID = Serialize(coinbaseTx)
+	coinbaseTx.ID = HashObject(Serialize(coinbaseTx))
 	coinbaseTx.Outputs[0].ID = UTXOTransactionID{
 		TxHash:  coinbaseTx.ID,
 		TxIndex: 0,
