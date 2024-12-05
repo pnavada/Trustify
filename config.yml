@@ -18,9 +18,9 @@ genesis_block:
   merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
   transaction_count: 10
   transactions:
-    ID: 8b728e373bdc6a3c9e4bfbfe5c52c2df3a24b1c2167c7e30de82a4c0e8699e8b
-    Data: "Geneis Data"
-    Outputs:
+    id: 8b728e373bdc6a3c9e4bfbfe5c52c2df3a24b1c2167c7e30de82a4c0e8699e8b
+    data: "Geneis Data"
+    outputs:
       - id: genesis_tx_0:0
         address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
         amount: 50

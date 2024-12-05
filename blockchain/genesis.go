@@ -41,6 +41,7 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 	//     return nil, errors.New("invalid Merkle root in genesis block")
 	// }
 
+	logger.InfoLogger.Printf("Transaction: %x\n", genesisConfig.Transactions.Outputs)
 	// Convert the transactions from ConfigUTXOTransaction to UTXOTransaction
 	var transactions []*UTXOTransaction
 	for _, tx := range genesisConfig.Transactions.Outputs {
@@ -52,15 +53,18 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 			Address: []byte(tx.Address),
 			Amount:  tx.Amount,
 		}
+
 		transactions = append(transactions, transaction)
 	}
+
+	logger.InfoLogger.Printf("Number of transactions: %d, Transaction count in genesis config: %d\n", len(transactions), genesisConfig.TransactionCount)
 
 	var blockTransactions []*Transaction
 	transaction := &Transaction{
 		Outputs: transactions,
 		Inputs:  nil,
 		Data:    genesisConfig.Transactions.Data,
-		ID:      genesisConfig.Transactions.ID,
+		ID:      []byte(genesisConfig.Transactions.ID),
 	}
 
 	blockTransactions = append(blockTransactions, transaction)
