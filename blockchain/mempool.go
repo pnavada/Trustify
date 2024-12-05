@@ -11,7 +11,7 @@ type TransactionHeap []*Transaction
 
 func (th TransactionHeap) Len() int { return len(th) }
 func (th TransactionHeap) Less(i, j int) bool {
-	return th[i].getTra > th[j].Fee // Higher fee, higher priority
+	return th[i].GetTransactionFee() > th[j].GetTransactionFee() // Higher fee, higher priority
 }
 func (th TransactionHeap) Swap(i, j int) {
 	th[i], th[j] = th[j], th[i]
