@@ -5,7 +5,7 @@ package blockchain
 // )
 
 type Transaction struct {
-	ID      []byte
+	ID      string
 	Inputs  []*UTXOTransaction
 	Outputs []*UTXOTransaction
 	Data    TransactionData

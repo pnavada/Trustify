@@ -7,15 +7,21 @@ import (
 	"trustify/logger"
 )
 
-func SerializeTransaction(tx *UTXOTransaction) []byte {
+func SerializeTransaction(tx *Transaction) []byte {
 	var buff bytes.Buffer
 	enc := gob.NewEncoder(&buff)
 	enc.Encode(tx)
 	return buff.Bytes()
 }
 
-func DeserializeTransaction(data []byte) *UTXOTransaction {
-	var tx UTXOTransaction
+func HashObject(serializedData []byte) []byte {
+	hash := sha256.Sum256(serializedData)
+	logger.InfoLogger.Println("Computed hash for block:", hash[:])
+	return hash[:]
+}
+
+func DeserializeTransaction(data []byte) *Transaction {
+	var tx Transaction
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	dec.Decode(&tx)
 	return &tx

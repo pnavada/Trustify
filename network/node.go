@@ -57,9 +57,12 @@ func NewNode(cfg *config.Config) *Node {
 
 	// Initialize UTXOSet with genesis block's transactions
 	for _, tx := range chain.Ledger[0].Transactions {
-		utxoSet.Add(tx) // TODO: create a copy of tx
-		if bytes.Equal(tx.Address, wallet.BitcoinAddress) {
-			wallet.UTXOs = append(wallet.UTXOs, tx)
+
+		for _, output := range tx.Outputs {
+			utxoSet.Add(output) // TODO: create a copy of output
+			if bytes.Equal(output.Address, wallet.BitcoinAddress) {
+				wallet.UTXOs = append(wallet.UTXOs, output)
+			}
 		}
 	}
 
