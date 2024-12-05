@@ -63,7 +63,7 @@ func (u *UTXOSet) Add(utxo *UTXOTransaction) bool {
 	return true
 }
 
-func (u *UTXOSet) Remove(id UTXOTransactionID) bool {
+func (u *UTXOSet) Remove(id *UTXOTransactionID) bool {
 	// Remove the transaction from the set
 	// Return a boolean indicating success or failure
 	u.Mutex.Lock()

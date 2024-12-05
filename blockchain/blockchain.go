@@ -72,6 +72,8 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 		bc.CommitBlock()
 	}
 
+	return nil
+
 }
 
 func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
@@ -111,7 +113,7 @@ func (bc *Blockchain) CommitBlock() {
 	blockToCommit := bc.Ledger[blockToCommitIndex]
 	for _, tx := range blockToCommit.Transactions {
 		for _, utxo := range tx.Inputs {
-			_, hasUTXO := bc.UTXOSet.Get(&utxo.ID)
+			_, hasUTXO := bc.UTXOSet.Get(utxo.ID)
 			if hasUTXO {
 				bc.UTXOSet.Remove(utxo.ID)
 			} else {
@@ -120,7 +122,7 @@ func (bc *Blockchain) CommitBlock() {
 		}
 
 		for _, utxo := range tx.Outputs {
-			_, hasUTXO := bc.UTXOSet.Get(&utxo.ID)
+			_, hasUTXO := bc.UTXOSet.Get(utxo.ID)
 			if hasUTXO {
 				// Handle error
 			} else {
@@ -130,10 +132,114 @@ func (bc *Blockchain) CommitBlock() {
 	}
 }
 
-
-func (bc *Blockchain) validateTransaction(tx *Transaction) error {
+// validateTransaction validates a single transaction for correctness.
+func (bc *Blockchain) ValidateTransaction(tx *Transaction, utxoSet *UTXOSet) error {
 	// Implement validation logic for transactions
 	// Check UTXOSet for inputs
 	// Verify signatures, double-spending, etc.
+
+	// Separate handling for Purchase and Review transactions
+	switch data := tx.Data.(type) {
+	case *PurchaseTransactionData:
+		return bc.validatePurchaseTransaction(tx, data, utxoSet)
+	case *ReviewTransactionData:
+		return bc.validateReviewTransaction(data)
+	default:
+		logger.ErrorLogger.Println("Invalid transaction type detected")
+		return ErrInvalidTransactionType
+	}
+}
+
+// validatePurchaseTransaction validates purchase transactions.
+func (bc *Blockchain) validatePurchaseTransaction(tx *Transaction, data *PurchaseTransactionData, utxoSet *UTXOSet) error {
+	inputSum := 0
+	outputSum := 0
+	usedUTXOs := make(map[string]bool)
+
+	// Validate Inputs
+	for _, input := range tx.Inputs {
+		utxo, exists := utxoSet.Get(input.ID)
+		if !exists {
+			logger.ErrorLogger.Printf("Input UTXO not found: %v\n", input.ID)
+			return ErrUTXONotFound
+		}
+
+		// Check for double-spending within the same transaction
+		utxoKey := input.ID.String()
+		if usedUTXOs[utxoKey] {
+			logger.ErrorLogger.Println("Double-spending detected within the transaction")
+			return ErrDoubleSpending
+		}
+		usedUTXOs[utxoKey] = true
+
+		// Accumulate the input sum
+		inputSum += utxo.Amount
+	}
+
+	// Validate Outputs
+	for _, output := range tx.Outputs {
+		outputSum += output.Amount
+	}
+
+	// Check if input sum covers output sum and fee
+	if inputSum < outputSum {
+		logger.ErrorLogger.Printf("Input sum (%d) is less than output sum (%d)\n", inputSum, outputSum)
+		return ErrInsufficientFunds
+	}
+
+	logger.InfoLogger.Printf("Purchase transaction validated successfully for Buyer: %x, Product: %s\n", data.BuyerAddress, data.ProductID)
 	return nil
+}
+
+// validateReviewTransaction validates review transactions.
+func (bc *Blockchain) validateReviewTransaction(data *ReviewTransactionData) error {
+	reviewer := data.ReviewerAddress
+	product := data.ProductID
+
+	// Check if the product was purchased by the reviewer
+	if !bc.hasPurchasedProduct(reviewer, product) {
+		logger.ErrorLogger.Printf("Reviewer %x has not purchased product %s\n", reviewer, product)
+		return ErrProductNotPurchased
+	}
+
+	// Check if a review already exists for this product by the reviewer
+	if bc.hasDuplicateReview(reviewer, product) {
+		logger.ErrorLogger.Printf("Duplicate review detected by %x for product %s\n", reviewer, product)
+		return ErrDuplicateReview
+	}
+
+	logger.InfoLogger.Printf("Review transaction validated successfully for Reviewer: %x, Product: %s\n", reviewer, product)
+	return nil
+}
+
+// hasPurchasedProduct checks the blockchain ledger for a purchase transaction by the reviewer for the product.
+func (bc *Blockchain) hasPurchasedProduct(reviewer []byte, product string) bool {
+	for _, block := range bc.Ledger {
+		for _, tx := range block.Transactions {
+			if purchaseData, ok := tx.Data.(*PurchaseTransactionData); ok {
+				if bytes.Equal(purchaseData.BuyerAddress, reviewer) && purchaseData.ProductID == product {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// hasDuplicateReview checks the blockchain ledger for duplicate reviews.
+func (bc *Blockchain) hasDuplicateReview(reviewer []byte, product string) bool {
+	for _, block := range bc.Ledger {
+		for _, tx := range block.Transactions {
+			if reviewData, ok := tx.Data.(*ReviewTransactionData); ok {
+				if bytes.Equal(reviewData.ReviewerAddress, reviewer) && reviewData.ProductID == product {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (bc *Blockchain) updateUTXOSet(b *Block) {
+	// Remove spent UTXOs and add new UTXOs from the block's transactions
 }
