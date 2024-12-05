@@ -18,39 +18,37 @@ genesis_block:
   merkle_root: 00000000b4d5c50efadb20ff99f46578b59ce2365
   transaction_count: 10
   transactions:
-    ID: 8b728e373bdc6a3c9e4bfbfe5c52c2df3a24b1c2167c7e30de82a4c0e8699e8b
-    Data: "Geneis Data"
-    Outputs:
-      - id: genesis_tx_0:0
-        address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
-        amount: 50
-      - id: genesis_tx_0:1
-        address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
-        amount: 50
-      - id: genesis_tx_0:2
-        address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
-        amount: 50
-      - id: genesis_tx_0:3
-        address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
-        amount: 50
-      - id: genesis_tx_0:4
-        address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
-        amount: 50
-      - id: genesis_tx_0:5
-        address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
-        amount: 50
-      - id: genesis_tx_0:6
-        address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
-        amount: 50
-      - id: genesis_tx_0:7
-        address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
-        amount: 50
-      - id: genesis_tx_0:8
-        address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
-        amount: 50
-      - id: genesis_tx_0:9
-        address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
-        amount: 50
+      outputs:
+        - id: genesis_tx_0:0
+          address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
+          amount: 50
+        - id: genesis_tx_0:1
+          address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+          amount: 50
+        - id: genesis_tx_0:2
+          address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
+          amount: 50
+        - id: genesis_tx_0:3
+          address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
+          amount: 50
+        - id: genesis_tx_0:4
+          address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
+          amount: 50
+        - id: genesis_tx_0:5
+          address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
+          amount: 50
+        - id: genesis_tx_0:6
+          address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
+          amount: 50
+        - id: genesis_tx_0:7
+          address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+          amount: 50
+        - id: genesis_tx_0:8
+          address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
+          amount: 50
+        - id: genesis_tx_0:9
+          address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
+          amount: 50
 nodes:
   node1:
     wallet:

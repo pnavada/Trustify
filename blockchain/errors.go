@@ -17,5 +17,4 @@ var (
 	ErrReviewDuplicate     = errors.New("duplicate review submission")
 	ErrInvalidSignature    = errors.New("invalid digital signature")
 	ErrUTXONotFound        = errors.New("UTXO not found")
-	ErrInsufficientFunds   = errors.New("insufficient funds")
 )

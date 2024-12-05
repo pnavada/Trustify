@@ -49,7 +49,12 @@ func (p *GetBlocksProtocol) ProcessGetBlocksResponse(response GetBlocksResponse)
 
 }
 
-// // Version 1
+
+
+
+// Version 2 
+
+
 
 // package network
 
@@ -168,7 +173,7 @@ func (p *GetBlocksProtocol) ProcessGetBlocksResponse(response GetBlocksResponse)
 
 //     logger.InfoLogger.Printf("Processing %d received blocks", len(response.Blocks))
 
-// // Validate and integrate received blocks
+//     // Validate and integrate received blocks
 //     for _, block := range response.Blocks {
 //         err := p.Node.Blockchain.AddBlock(block)
 //         if err != nil {

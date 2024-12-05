@@ -1,21 +1,15 @@
 package blockchain
 
-import (
-	"bytes"
-	"trustify/logger"
-)
-
 type Miner struct {
 	Blockchain *Blockchain
 	Mempool    *Mempool
-	Wallet     *Wallet
 }
 
-func NewMiner(bc *Blockchain, mp *Mempool, wallet *Wallet) *Miner {
-	return &Miner{Blockchain: bc, Mempool: mp, Wallet: wallet}
+func NewMiner(bc *Blockchain, mp *Mempool) *Miner {
+	return &Miner{Blockchain: bc, Mempool: mp}
 }
 
-func (m *Miner) MineBlock(blockSize int) (*Block, error) {
+func (m *Miner) MineBlock() (*Block, error) {
 	// Collect transactions, create block, perform proof of work
 	// This method should be called when there are enough transactions in the mempool
 	// form a block.
@@ -30,65 +24,44 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 	// Perform proof of work to find the valid nonce for the block
 	// Add the block to the ledger and broadcast over the network
 	// Ensure there are enough transactions
+    // txCount := m.Blockchain.Ledger[0].TransactionCount // Assuming block size from genesis block
+    // if m.Mempool.Transactions.Len() < txCount {
+    //     logger.InfoLogger.Println("Not enough transactions to mine a block")
+    //     return nil, nil
+    // }
 
-	// Get transactions from mempool
-	transactions := m.Mempool.GetTransactions(blockSize)
+    // // Get transactions from mempool
+    // transactions := m.Mempool.GetTransactions(txCount)
 
-	// Add coinbase transaction
-	coinbaseTx := m.createCoinbaseTransaction(len(m.Blockchain.Ledger))
+    // // Add coinbase transaction
+    // coinbaseTx := m.createCoinbaseTransaction()
+    // transactions = append([]*UTXOTransaction{coinbaseTx}, transactions...)
 
-	// Add transaction fee and review rewards
-	for _, tx := range transactions {
-		switch data := tx.Data.(type) {
-		case *PurchaseTransactionData:
-			// Handle ProductTransactionData
-			logger.InfoLogger.Println("Processing PurchaseTransactionData for transaction:", tx.ID)
-			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
-				Address: m.Wallet.BitcoinAddress,
-				Amount:  tx.GetTransactionFee(),
-			})
-			// Add your logic for ProductTransactionData here
-		case *ReviewTransactionData:
-			// Handle ReviewTransactionData
-			logger.InfoLogger.Println("Processing ReviewTransactionData for transaction:", tx.ID)
-			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
-				Address: data.ReviewerAddress,
-				Amount:  m.Blockchain.ReviewReward,
-			})
-			// Add your logic for ReviewTransactionData here
-		default:
-			logger.InfoLogger.Println("Unknown transaction data type for transaction:", tx.ID)
-		}
-	}
+    // // Create new block
+    // previousHash := m.Blockchain.LatestBlock().Header.BlockHash
+    // targetHash := m.Blockchain.LatestBlock().Header.TargetHash // Assuming same target
+    // block, err := NewBlock(transactions, previousHash, targetHash)
+    // if err != nil {
+    //     logger.ErrorLogger.Println("Failed to create new block:", err)
+    //     return nil, err
+    // }
 
-	transactions = append([]*Transaction{coinbaseTx}, transactions...)
+    // // Perform Proof of Work
+    // m.ProofOfWork(block)
 
-	// Create new block
-	previousHash := m.Blockchain.LatestBlock().Header.BlockHash
-	targetHash := m.Blockchain.LatestBlock().Header.TargetHash
-	block, err := NewBlock(transactions, previousHash, targetHash)
-	if err != nil {
-		logger.ErrorLogger.Println("Failed to create new block:", err)
-		return nil, err
-	}
+    // // Add block to blockchain
+    // err = m.Blockchain.AddBlock(block)
+    // if err != nil {
+    //     logger.ErrorLogger.Println("Failed to add block to blockchain:", err)
+    //     return nil, err
+    // }
 
-	// Perform Proof of Work
-	m.ProofOfWork(block)
+    // // Broadcast block
+    // // Assuming n.BroadcastBlock(block) exists
+    // logger.InfoLogger.Println("New block mined and added to blockchain:", block.Header.BlockHash)
+    // return block, nil
 
-	// Add block to blockchain
-	err = m.Blockchain.AddBlock(block)
-	if err != nil {
-		logger.ErrorLogger.Println("Failed to add block to blockchain:", err)
-		return nil, err
-	}
-
-	// Broadcast block
-	// Assuming n.BroadcastBlock(block) exists
-	logger.InfoLogger.Println("New block mined and added to blockchain:", block.Header.BlockHash)
-	return block, nil
-
+	return nil, nil
 }
 
 func (m *Miner) ProofOfWork(b *Block) {
@@ -96,39 +69,34 @@ func (m *Miner) ProofOfWork(b *Block) {
 	// Here  the block is the block for which the nonce is to be found
 	// The nonce is intiialized to zero and incremented until the hash of the block is less than the target hash
 	// Basic idea is to find a nonce such that the hash of the block is less than the target hash
-	var hash []byte
-	nonce := int64(0)
-	for {
-		b.Header.Nonce = nonce
-		hash = HashObject(Serialize(b))
-		if bytes.Compare(hash, b.Header.TargetHash) < 0 {
-			b.Header.BlockHash = hash
-			logger.InfoLogger.Println("Proof of Work successful with nonce:", nonce)
-			break
-		} else {
-			nonce++
-		}
-	}
+
+	// var hash []byte
+    // nonce := int64(0)
+    // for {
+    //     b.Header.Nonce = nonce
+    //     hash = b.ComputeHash()
+    //     if bytes.Compare(hash, b.Header.TargetHash) < 0 {
+    //         b.Header.BlockHash = hash
+    //         logger.InfoLogger.Println("Proof of Work successful with nonce:", nonce)
+    //         break
+    //     } else {
+    //         nonce++
+    //     }
+    // }
 
 }
 
-func (m *Miner) createCoinbaseTransaction(numBlocks int) *Transaction {
-	// Create a coinbase transaction rewarding the miner
-	coinbaseTx := &Transaction{
-		Outputs: make([]*UTXOTransaction, 1),
-		Data: CoinbaseTransactionData{
-			BlockHeight: numBlocks,
-		},
-	}
-	coinbaseTx.Outputs[0] = &UTXOTransaction{
-		Address: m.Wallet.BitcoinAddress,
-		Amount:  m.Blockchain.MiningReward,
-	}
-	coinbaseTx.ID = HashObject(Serialize(coinbaseTx))
-	coinbaseTx.Outputs[0].ID = UTXOTransactionID{
-		TxHash:  coinbaseTx.ID,
-		TxIndex: 0,
-	}
-	logger.InfoLogger.Println("Coinbase transaction created for miner reward")
-	return coinbaseTx
+func (m *Miner) createCoinbaseTransaction() *UTXOTransaction {
+    // Create a coinbase transaction rewarding the miner
+    // tx := &UTXOTransaction{
+    //     ID: UTXOTransactionID{
+    //         // Set appropriate BlockHash and TxIndex
+    //     },
+    //     Address: m.Wallet.BitcoinAddress,
+    //     Amount:  m.Blockchain.MiningReward,
+    //     Fee:     0,
+    // }
+    // logger.InfoLogger.Println("Coinbase transaction created for miner reward")
+    // return tx
+	return nil
 }
