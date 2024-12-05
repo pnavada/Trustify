@@ -39,7 +39,7 @@ func NewUTXOSet() *UTXOSet {
 
 // Helper method to convert UTXOTransactionID to string
 func (id UTXOTransactionID) String() string {
-	return fmt.Sprintf("%x:%d", id.BlockHash, id.TxIndex)
+	return fmt.Sprintf("%x:%d", id.TxHash, id.TxIndex)
 }
 
 func (u *UTXOSet) Add(utxo *UTXOTransaction) {

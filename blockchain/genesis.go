@@ -46,12 +46,11 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 	for _, tx := range genesisConfig.Transactions.Outputs {
 		transaction := &UTXOTransaction{
 			ID: UTXOTransactionID{
-				BlockHash: blockHash,
-				TxIndex:   len(transactions),
+				TxHash:  blockHash,
+				TxIndex: len(transactions),
 			},
 			Address: []byte(tx.Address),
 			Amount:  tx.Amount,
-			Fee:     0, // Genesis transactions typically have no fee
 		}
 		transactions = append(transactions, transaction)
 	}
