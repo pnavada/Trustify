@@ -72,6 +72,8 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 		bc.CommitBlock()
 	}
 
+	return nil
+
 }
 
 func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
@@ -111,16 +113,16 @@ func (bc *Blockchain) CommitBlock() {
 	blockToCommit := bc.Ledger[blockToCommitIndex]
 	for _, tx := range blockToCommit.Transactions {
 		for _, utxo := range tx.Inputs {
-			_, hasUTXO := bc.UTXOSet.Get(&utxo.ID)
+			_, hasUTXO := bc.UTXOSet.Get(utxo.ID)
 			if hasUTXO {
-				bc.UTXOSet.Remove(utxo.ID)
+				bc.UTXOSet.Remove(*utxo.ID)
 			} else {
 				// TODO: Handle error
 			}
 		}
 
 		for _, utxo := range tx.Outputs {
-			_, hasUTXO := bc.UTXOSet.Get(&utxo.ID)
+			_, hasUTXO := bc.UTXOSet.Get(utxo.ID)
 			if hasUTXO {
 				// Handle error
 			} else {
@@ -129,7 +131,6 @@ func (bc *Blockchain) CommitBlock() {
 		}
 	}
 }
-
 
 func (bc *Blockchain) validateTransaction(tx *Transaction) error {
 	// Implement validation logic for transactions
