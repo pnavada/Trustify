@@ -45,7 +45,7 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 	var transactions []*UTXOTransaction
 	for _, tx := range genesisConfig.Transactions.Outputs {
 		transaction := &UTXOTransaction{
-			ID: UTXOTransactionID{
+			ID: &UTXOTransactionID{
 				TxHash:  blockHash,
 				TxIndex: len(transactions),
 			},
