@@ -37,11 +37,11 @@ func (w *Wallet) SignTransaction(tx *UTXOTransaction) {
 	// return crypto.Sign(tx, w.PrivateKey)
 }
 
-func (w *Wallet) CreateInputs(amount int) ([]UTXOTransaction, int, error) {
-	var inputs []UTXOTransaction
+func (w *Wallet) CreateInputs(amount int) ([]*UTXOTransaction, int, error) {
+	var inputs []*UTXOTransaction
 	total := 0
 	for _, utxo := range w.UTXOs {
-		inputs = append(inputs, *utxo)
+		inputs = append(inputs, utxo)
 		total += utxo.Amount
 		if total >= amount {
 			break

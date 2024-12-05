@@ -13,7 +13,7 @@ import (
 )
 
 type Node struct {
-	Config       *config.ConfigNode
+	Config       *config.Config
 	Wallet       *blockchain.Wallet
 	Blockchain   *blockchain.Blockchain
 	Mempool      *blockchain.Mempool
@@ -23,6 +23,7 @@ type Node struct {
 	TCPEgress    *ConnectionPool
 	ReadChannel  chan InboundMessage
 	WriteChannel chan OutboundMessage
+	hostName     string
 }
 
 // Context - blockchain package files
@@ -58,9 +59,12 @@ func NewNode(cfg *config.Config) *Node {
 
 	// Initialize UTXOSet with genesis block's transactions
 	for _, tx := range chain.Ledger[0].Transactions {
-		utxoSet.Add(tx) // TODO: create a copy of tx
-		if bytes.Equal(tx.Address, wallet.BitcoinAddress) {
-			wallet.UTXOs = append(wallet.UTXOs, tx)
+
+		for _, output := range tx.Outputs {
+			utxoSet.Add(output) // TODO: create a copy of output
+			if bytes.Equal(output.Address, wallet.BitcoinAddress) {
+				wallet.UTXOs = append(wallet.UTXOs, output)
+			}
 		}
 	}
 
@@ -75,7 +79,7 @@ func NewNode(cfg *config.Config) *Node {
 	}
 
 	node := &Node{
-		Config:       &cfgNode,
+		Config:       cfg,
 		Wallet:       wallet,
 		Blockchain:   chain,
 		Mempool:      mempool,
@@ -85,6 +89,7 @@ func NewNode(cfg *config.Config) *Node {
 		TCPEgress:    NewTCPConnectionPool(8080, Outgoing),
 		ReadChannel:  make(chan InboundMessage),
 		WriteChannel: make(chan OutboundMessage),
+		hostName:     me,
 	}
 
 	logger.InfoLogger.Printf("Node initialized: %+v\n", node)
@@ -95,9 +100,9 @@ func NewNode(cfg *config.Config) *Node {
 
 func (n *Node) StartMining() {
 	for {
-		blockSize = cfg.BlockchainSettings.BlockSize
+		blockSize := n.Config.BlockchainSettings.BlockSize
 		if n.Mempool.Transactions.Len() >= blockSize {
-			block = n.miner.MineBlock(blockSize)
+			block, _ := n.Miner.MineBlock(blockSize)
 			n.BroadcastBlock(block)
 		}
 	}
@@ -127,7 +132,7 @@ func (n *Node) Start() {
 	}
 
 	// Handle transactions from configuration file
-	for _, tx := range n.Config.Transactions {
+	for _, tx := range n.Config.Nodes[n.hostName].Transactions {
 		go n.handleConfigTransaction(tx)
 	}
 	go n.CommitBlocks()

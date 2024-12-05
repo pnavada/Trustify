@@ -14,14 +14,8 @@ func SerializeTransaction(tx *Transaction) []byte {
 	return buff.Bytes()
 }
 
-func HashObject(serializedData []byte) []byte {
-	hash := sha256.Sum256(serializedData)
-	logger.InfoLogger.Println("Computed hash for block:", hash[:])
-	return hash[:]
-}
-
-func DeserializeTransaction(data []byte) *Transaction {
-	var tx Transaction
+func DeserializeTransaction(data []byte) *UTXOTransaction {
+	var tx UTXOTransaction
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	dec.Decode(&tx)
 	return &tx
@@ -39,4 +33,17 @@ func DeserializeBlock(data []byte) *Block {
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	dec.Decode(&b)
 	return &b
+}
+
+func HashObject(serializedData []byte) []byte {
+	hash := sha256.Sum256(serializedData)
+	logger.InfoLogger.Println("Computed hash for block:", hash[:])
+	return hash[:]
+}
+
+func Serialize(data interface{}) []byte {
+	var buff bytes.Buffer
+	enc := gob.NewEncoder(&buff)
+	enc.Encode(data)
+	return buff.Bytes()
 }
