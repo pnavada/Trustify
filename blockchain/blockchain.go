@@ -72,6 +72,8 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 		bc.CommitBlock()
 	}
 
+	return nil
+
 }
 
 func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
