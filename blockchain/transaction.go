@@ -28,6 +28,21 @@ type ReviewTransactionData struct {
 	ProductID       string
 }
 
+type CoinbaseTrasactionData struct {
+    BlockHeight int
+}
+
+func GetTransactionFee(tx *Transaction) int {
+    fee := 0
+    for _, input := range tx.Inputs {
+        fee += input.Amount
+    }
+    for _, output := range tx.Outputs {
+        fee -= output.Amount
+    }
+    return fee
+}
+
 func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID string) *Transaction {
 	// Create a new purchase transaction
 	// For a purchase transaction, the user's wallet contains the list of unspent tranactions used for spending
