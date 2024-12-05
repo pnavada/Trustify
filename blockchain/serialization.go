@@ -14,8 +14,8 @@ func SerializeTransaction(tx *Transaction) []byte {
 	return buff.Bytes()
 }
 
-func DeserializeTransaction(data []byte) *Transaction {
-	var tx Transaction
+func DeserializeTransaction(data []byte) *UTXOTransaction {
+	var tx UTXOTransaction
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	dec.Decode(&tx)
 	return &tx
