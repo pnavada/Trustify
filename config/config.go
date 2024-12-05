@@ -69,7 +69,7 @@ type ConfigGenesisBlock struct {
 }
 
 type ConfigGenesisTransactions struct {
-	ID      []byte                  `yaml:"id"`
+	ID      string                  `yaml:"id"`
 	Data    string                  `yaml:"data"`
 	Inputs  []ConfigUTXOTransaction `yaml:"inputs"`
 	Outputs []ConfigUTXOTransaction `yaml:"outputs"`
