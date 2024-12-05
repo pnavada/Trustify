@@ -1,11 +1,14 @@
 package blockchain
 
 import (
+	"bytes"
 	"fmt"
+	"sync"
+	"trustify/logger"
 )
 
 type UTXOTransaction struct {
-	ID      UTXOTransactionID
+	ID      *UTXOTransactionID
 	Address []byte
 	Amount  int
 }
@@ -30,6 +33,7 @@ type UTXOTransactionID struct {
 
 type UTXOSet struct {
 	UTXOs map[string]*UTXOTransaction
+	Mutex sync.Mutex
 }
 
 func NewUTXOSet() *UTXOSet {
@@ -42,62 +46,60 @@ func (id UTXOTransactionID) String() string {
 	return fmt.Sprintf("%x:%d", id.TxHash, id.TxIndex)
 }
 
-func (u *UTXOSet) Add(utxo *UTXOTransaction) {
+func (u *UTXOSet) Add(utxo *UTXOTransaction) bool {
 	// Add a UXTO transaction to the set
 	// Make sure the transaction is unique
 	// There cannot be duplocates in a set!
 	// Return a boolean indicating success or failure
-	// u.Mutex.Lock()
-	// defer u.Mutex.Unlock()
-	// key := utxo.ID.String()
-	// if _, exists := u.UTXOs[key]; exists {
-	//     logger.ErrorLogger.Println("UTXO already exists:", key)
-	//     return false
-	// }
-	// u.UTXOs[key] = &utxo
-	// logger.InfoLogger.Println("UTXO added:", key)
-	// return true
+	u.Mutex.Lock()
+	defer u.Mutex.Unlock()
+	key := utxo.ID.String()
+	if _, exists := u.UTXOs[key]; exists {
+		logger.ErrorLogger.Println("UTXO already exists:", key)
+		return false
+	}
+	u.UTXOs[key] = utxo
+	logger.InfoLogger.Println("UTXO added:", key)
+	return true
 }
 
-func (u *UTXOSet) Remove(id UTXOTransactionID) {
+func (u *UTXOSet) Remove(id UTXOTransactionID) bool {
 	// Remove the transaction from the set
 	// Return a boolean indicating success or failure
-	// u.Mutex.Lock()
-	// defer u.Mutex.Unlock()
-	// key := id.String()
-	// if _, exists := u.UTXOs[key]; !exists {
-	//     logger.ErrorLogger.Println("UTXO not found:", key)
-	//     return false
-	// }
-	// delete(u.UTXOs, key)
-	// logger.InfoLogger.Println("UTXO removed:", key)
-	// return true
+	u.Mutex.Lock()
+	defer u.Mutex.Unlock()
+	key := id.String()
+	if _, exists := u.UTXOs[key]; !exists {
+		logger.ErrorLogger.Println("UTXO not found:", key)
+		return false
+	}
+	delete(u.UTXOs, key)
+	logger.InfoLogger.Println("UTXO removed:", key)
+	return true
 }
 
 func (u *UTXOSet) Get(id *UTXOTransactionID) (*UTXOTransaction, bool) {
 	// Get the transaction
-	// u.Mutex.Lock()
-	// defer u.Mutex.Unlock()
-	// key := id.String()
-	// utxo, exists := u.UTXOs[key]
-	// if !exists {
-	//     logger.ErrorLogger.Println("UTXO not found:", key)
-	//     return nil, false
-	// }
-	// return utxo, true
-	return nil, false
+	u.Mutex.Lock()
+	defer u.Mutex.Unlock()
+	key := id.String()
+	utxo, exists := u.UTXOs[key]
+	if !exists {
+		logger.ErrorLogger.Println("UTXO not found:", key)
+		return nil, false
+	}
+	return utxo, true
 }
 
 func (u *UTXOSet) GetAllForAddress(address []byte) []*UTXOTransaction {
 	// // Get all transcations for the specified address
-	// u.Mutex.Lock()
-	// defer u.Mutex.Unlock()
-	// var utxos []*UTXOTransaction
-	// for _, utxo := range u.UTXOs {
-	//     if bytes.Equal(utxo.Address, address) {
-	//         utxos = append(utxos, utxo)
-	//     }
-	// }
-	// return utxos
-	return nil
+	u.Mutex.Lock()
+	defer u.Mutex.Unlock()
+	var utxos []*UTXOTransaction
+	for _, utxo := range u.UTXOs {
+		if bytes.Equal(utxo.Address, address) {
+			utxos = append(utxos, utxo)
+		}
+	}
+	return utxos
 }

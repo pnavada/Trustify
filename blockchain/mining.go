@@ -125,7 +125,7 @@ func (m *Miner) createCoinbaseTransaction(numBlocks int) *Transaction {
 		Amount:  m.Blockchain.MiningReward,
 	}
 	coinbaseTx.ID = HashObject(Serialize(coinbaseTx))
-	coinbaseTx.Outputs[0].ID = UTXOTransactionID{
+	coinbaseTx.Outputs[0].ID = &UTXOTransactionID{
 		TxHash:  coinbaseTx.ID,
 		TxIndex: 0,
 	}
