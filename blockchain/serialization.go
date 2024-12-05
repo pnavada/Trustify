@@ -7,6 +7,13 @@ import (
 	"trustify/logger"
 )
 
+func init() {
+	// Register all concrete types used in interfaces
+	gob.Register(PurchaseTransactionData{})
+	gob.Register(ReviewTransactionData{})
+	gob.Register(UTXOTransaction{})
+}
+
 func SerializeTransaction(tx *Transaction) []byte {
 	var buff bytes.Buffer
 	enc := gob.NewEncoder(&buff)
@@ -14,8 +21,8 @@ func SerializeTransaction(tx *Transaction) []byte {
 	return buff.Bytes()
 }
 
-func DeserializeTransaction(data []byte) *UTXOTransaction {
-	var tx UTXOTransaction
+func DeserializeTransaction(data []byte) *Transaction {
+	var tx Transaction
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	dec.Decode(&tx)
 	return &tx
@@ -46,4 +53,9 @@ func Serialize(data interface{}) []byte {
 	enc := gob.NewEncoder(&buff)
 	enc.Encode(data)
 	return buff.Bytes()
+}
+
+func Deserialize(data []byte, v interface{}) {
+	dec := gob.NewDecoder(bytes.NewReader(data))
+	dec.Decode(v)
 }

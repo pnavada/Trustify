@@ -73,7 +73,7 @@ func Sign(data []byte, privateKey []byte) ([]byte, error) {
 	return signature, nil
 }
 
-func Verify(data []byte, signature []byte, publicKey []byte) bool {
+func VerifySignature(hash []byte, signature []byte, publicKey []byte) bool {
 	//  Verify the digital signature of the data using the public key.
 	// Hash the input data to create a digest (same method used in Sign).
 	// Use the public key to verify the signature against the hash.
@@ -107,9 +107,6 @@ func Verify(data []byte, signature []byte, publicKey []byte) bool {
 	if !ok {
 		return false
 	}
-
-	// Hash the data using SHA-256
-	hash := sha256.Sum256(data)
 
 	// Decode the signature from ASN.1 DER
 	type ecdsaSignature struct {

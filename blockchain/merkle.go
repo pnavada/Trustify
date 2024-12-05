@@ -138,34 +138,3 @@ func (mt *MerkleTree) GetRoot() []byte {
 	}
 	return mt.Root.Hash
 }
-
-func (mt *MerkleTree) VerifyTransaction(tx UTXOTransaction, proof [][]byte) bool {
-	// Verify that a transaction exists in the Merkle Tree using a proof.
-	// Hash the provided transaction using the same algorithm used for tree construction.
-	// Iterate through the proof, hashing the current hash with each proof node’s hash.
-	// If the final computed hash matches the Merkle Root, the transaction is verified.
-	// Return true if the transaction is valid; otherwise, return false.
-
-	// if mt.Root == nil {
-	//     logger.ErrorLogger.Println("Cannot verify transaction in an empty Merkle tree")
-	//     return false
-	// }
-
-	// currentHash := tx.Hash()
-
-	// for _, siblingHash := range proof {
-	//     combined := append(currentHash, siblingHash...)
-	//     newHash := sha256.Sum256(combined)
-	//     currentHash = newHash[:]
-	// }
-
-	// isValid := bytes.Equal(currentHash, mt.Root.Hash)
-	// if isValid {
-	//     logger.InfoLogger.Println("Transaction verified in Merkle tree")
-	// } else {
-	//     logger.ErrorLogger.Println("Transaction verification failed in Merkle tree")
-	// }
-	// return isValid
-
-	return false
-}

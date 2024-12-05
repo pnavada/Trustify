@@ -22,4 +22,5 @@ var (
 	ErrDuplicateReview        = errors.New("duplicate review for the product by the same reviewer")
 	ErrInvalidTransactionType = errors.New("invalid transaction type")
 	ErrInputOutputMismatch    = errors.New("input and output sum mismatch in transaction")
+	ErrInvalidProofOfWork     = errors.New("invalid proof of work")
 )

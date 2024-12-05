@@ -11,6 +11,7 @@ type Blockchain struct {
 	MiningReward      int
 	ReviewReward      int
 	ConfirmationDepth int
+	TargetHash        []byte
 	UTXOSet           *UTXOSet
 }
 
@@ -22,7 +23,7 @@ type Blockchain struct {
 // Initialize the blockchain’s settings using input parameters (i.e., MiningReward, ReviewReward, and ConfirmationDepth).
 // Initialize any auxiliary structures required for managing transactions, such as UTXO sets or review tracking.
 // Return the newly created Blockchain instance ready for use.
-func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *config.ConfigBlockchainSettings, utxoSet *UTXOSet) (*Blockchain, error) {
+func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *config.ConfigBlockchainSettings, utxoSet *UTXOSet, targetHash []byte) (*Blockchain, error) {
 	// Convert ConfigGenesisBlock to Block
 	block, err := convertConfigGenesisBlockToBlock(genesisBlock)
 	if err != nil {
@@ -38,38 +39,100 @@ func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *
 		ReviewReward:      blockchainSettings.ReviewReward,
 		ConfirmationDepth: blockchainSettings.BlockConfirmationDepth,
 		UTXOSet:           utxoSet,
+		TargetHash:        targetHash,
 	}
 
 	logger.InfoLogger.Printf("Blockchain initialized with genesis block:  %+v\n", bc)
 	return bc, nil
 }
 
-func (bc *Blockchain) AddBlock(b *Block) error {
-	// Check the structure of the block, ensuring it contains all the required fields to create a block.
-	// Perform all validations necessary
-	// Validate the merkle root of the block’s transactions against the transactions themselves.
-	// Validate the block’s Proof of Work (PoW) against the configured target hash.
-	// Validate the block’s timestamp to ensure it is within a reasonable range.
-	// Verify that the block references the correct hash of the previous block in the chain.
-	// Iterate through all transactions in the block:
-	// Perform the required checks for all transactions: verifying digital signatures, verifying input and output transactions, etc
-	// For purchase transactions, validate the inputs against the unspent transaction outputs (UTXO) set.
-	// Ensure there is no double-spending in the block.
-	// For review transactions, ensure the reviwer has purchase the product
-	// For review transactions, confirm that the reviewer has not already submitted a review for it.
-	// Append the validated block to the chain if all checks pass.
-	// Return meaningful error messages if the block fails any validation step.
-	// Make sure the addition of the block is an atomic operation—either fully added or not at all, to maintain blockchain integrity.
+func (bc *Blockchain) AddBlock(block *Block) error {
 
-	// // Validate previous hash
+	err := bc.ValidateBlock(block)
+	if err != nil {
+		logger.ErrorLogger.Println("Invalid block:", err)
+		return err
+	}
+
+	// Validate previous hash
 	lastBlock := bc.LatestBlock()
-	if !bytes.Equal(b.Header.PreviousHash, lastBlock.Header.BlockHash) {
+	
+	if !bytes.Equal(block.Header.PreviousHash, lastBlock.Header.BlockHash) {
 		logger.ErrorLogger.Println("Block's previous hash does not match the latest block's hash")
 		// TODO:  Start getblocks protocol
 	} else {
-		bc.Ledger = append(bc.Ledger, b)
-		logger.InfoLogger.Println("Block added to blockchain:", b.Header.BlockHash)
+		// Add block to blockchain
+		bc.Ledger = append(bc.Ledger, block)
+		logger.InfoLogger.Println("Block added to blockchain:", block.Header.BlockHash)
+		// Commit block if it reaches the confirmation depth
 		bc.CommitBlock()
+	}
+
+	return nil
+
+}
+
+func (bc *Blockchain) ValidateProofOfWork(block *Block, target []byte) bool {
+
+	hash := bc.ComputeHash(block)
+	return bytes.Compare(hash, target) == -1
+
+}
+
+func (bc *Blockchain) ValidateMerkeRoot(block *Block) bool {
+
+	merkleTree, err := BuildTree(block.Transactions)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to build Merkle tree:", err)
+		return false
+	}
+
+	return bytes.Equal(merkleTree.Root.Hash, block.Header.MerkleRoot)
+
+}
+
+func (bc *Blockchain) ValidateTimeStamp(block *Block) bool {
+
+	lastBlock := bc.LatestBlock()
+	return block.Header.Timestamp > lastBlock.Header.Timestamp
+
+}
+
+func (bc *Blockchain) ComputeHash(block *Block) []byte {
+
+	serializedBlockHeader := Serialize(block.Header)
+	hash := HashObject(serializedBlockHeader)
+	return hash
+
+}
+
+func (bc *Blockchain) ValidateBlock(block *Block) error {
+
+	// Verify proof of work
+	if !bc.ValidateProofOfWork(block, bc.TargetHash) {
+		logger.ErrorLogger.Println("Invalid proof of work")
+		return ErrInvalidProofOfWork
+	}
+
+	// Verify merkle root
+	if !bc.ValidateMerkeRoot(block) {
+		logger.ErrorLogger.Println("Invalid Merkle root")
+		return ErrInvalidMerkleRoot
+	}
+
+	// Verify timestamp
+	if !bc.ValidateTimeStamp(block) {
+		logger.ErrorLogger.Println("Invalid timestamp")
+		return ErrInvalidTimestamp
+	}
+
+	// Validate transactions
+	for _, tx := range block.Transactions {
+		err := bc.ValidateTransaction(tx, bc.UTXOSet)
+		if err != nil {
+			logger.ErrorLogger.Println("Invalid transaction:", err)
+			return err
+		}
 	}
 
 	return nil
@@ -130,6 +193,10 @@ func (bc *Blockchain) CommitBlock() {
 			}
 		}
 	}
+}
+
+func (bc *Blockchain) GetUTXOSet() *UTXOSet {
+	return bc.UTXOSet
 }
 
 // validateTransaction validates a single transaction for correctness.

@@ -105,27 +105,3 @@ func NewReviewTransaction(w *Wallet, productID string, rating int) *Transaction 
 	logger.InfoLogger.Println("New review transaction created:", tx.ID)
 	return tx
 }
-
-// func (tx *Transaction) Verify() bool {
-// 	// Extract public key from address
-// 	var pubKey []byte
-// 	switch data := tx.Data.(type) {
-// 	case *PurchaseTransactionData:
-// 	    pubKey = data.BuyerAddress
-// 	case *ReviewTransactionData:
-// 	    pubKey = data.ReviewerAddress
-// 	default:
-// 	    logger.ErrorLogger.Println("Unknown transaction data type")
-// 	    return false
-// 	}
-
-//     // Serialize the transaction and generate a hash
-// 	Serialized := SerializeTransaction(tx)
-// 	hashed := HashObject(Serialized)
-
-// 	valid := crypto.Verify(hashed, tx.Signature, pubKey)
-// 	if !valid {
-// 	    logger.ErrorLogger.Println("Transaction signature verification failed")
-// 	}
-// 	return valid
-// }

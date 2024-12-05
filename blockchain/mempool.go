@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"bytes"
 	"container/heap"
 	"sync"
 )
@@ -44,6 +45,28 @@ func (mp *Mempool) AddTransaction(tx *Transaction) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 	heap.Push(mp.Transactions, tx)
+}
+
+func (tx *Transaction) Equals(other *Transaction) bool {
+	SerializedTx := SerializeTransaction(tx)
+	hashedTx := HashObject(SerializedTx)
+
+	SerializedOther := SerializeTransaction(other)
+	hashedOther := HashObject(SerializedOther)
+
+	// Compare the hashes of the two transactions
+	return bytes.Equal(hashedTx, hashedOther)
+}
+
+func (mp *Mempool) HasTransaction(tx *Transaction) bool {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+	for _, t := range *mp.Transactions {
+		if t.Equals(tx) {
+			return true
+		}
+	}
+	return false
 }
 
 func (mp *Mempool) GetTransactions(count int) []*Transaction {
