@@ -184,12 +184,12 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 		return
 	}
 
-	// Validate and add the transaction to the mempool
-	err = n.HandleIncomingTransaction(transaction)
-	if err != nil {
-		logger.ErrorLogger.Printf("Failed to handle incoming transaction: %v", err)
-		return
-	}
+	// Print the constructed transaction
+	logger.InfoLogger.Printf("Constructed transaction: %+v", transaction)
+
+	// TODO Validate and add the transaction to the mempool
+	// TODO Broadcast the transaction to the network
+
 }
 
 // Network communication

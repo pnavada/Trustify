@@ -72,7 +72,6 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 		bc.CommitBlock()
 	}
 
-	return nil
 }
 
 func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
@@ -81,7 +80,6 @@ func (bc *Blockchain) GetBlockByHash(hash []byte) (*Block, error) {
 	// If a block with the matching hash is found, return it.
 	// If no block is found with the given hash, return a meaningful error indicating that the block does not exist.
 	// Ensure that the retrieved block is valid within the context of the current chain state (e.g., hasn’t been replaced by a fork).
-
 	for _, block := range bc.Ledger {
 		if bytes.Equal(block.Header.BlockHash, hash) {
 			logger.InfoLogger.Println("Block found for hash:", hash)
@@ -132,7 +130,8 @@ func (bc *Blockchain) CommitBlock() {
 	}
 }
 
-func (bc *Blockchain) validateTransaction(tx *UTXOTransaction) error {
+
+func (bc *Blockchain) validateTransaction(tx *Transaction) error {
 	// Implement validation logic for transactions
 	// Check UTXOSet for inputs
 	// Verify signatures, double-spending, etc.
