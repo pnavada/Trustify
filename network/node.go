@@ -66,7 +66,7 @@ func NewNode(cfg *config.Config) *Node {
 		}
 	}
 
-	miner := blockchain.NewMiner(chain, mempool)
+	miner := blockchain.NewMiner(chain, mempool, wallet)
 
 	// Initialize peers
 	var peers []string
@@ -96,18 +96,18 @@ func NewNode(cfg *config.Config) *Node {
 }
 
 func (n *Node) StartMining() {
-    for {
-		blockSize = cfg.BlockchainSettings.BlockSize
-        if n.Mempool.Transactions.Len() >= blockSize {
-            block = n.miner.MineBlock(blockSize)
-			n.BroadcastBlock(block)
-        }
-    }
+	for {
+		blockSize := n.Config.BlockchainSettings.BlockSize
+		if n.Mempool.Transactions.Len() >= blockSize {
+			block, _ := n.Miner.MineBlock(blockSize)
+			n.BroadcastBlock(*block)
+		}
+	}
 }
 
-func (n* Node) CommitBlocks() {
+func (n *Node) CommitBlocks() {
 	for {
-		
+
 	}
 }
 
@@ -128,7 +128,7 @@ func (n *Node) Start() {
 		go n.SendMessageToHost(peer, []byte("hello"))
 	}
 
-	go n.StartMining()	
+	go n.StartMining()
 	go n.CommitBlocks()
 
 	n.HandleMessages()

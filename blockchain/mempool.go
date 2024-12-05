@@ -7,7 +7,7 @@ import (
 
 // Feel free to correct any mistakes or define new methods if needed
 
-type TransactionHeap []*UTXOTransaction
+type TransactionHeap []*Transaction
 
 func (th TransactionHeap) Len() int { return len(th) }
 func (th TransactionHeap) Less(i, j int) bool {
@@ -18,7 +18,7 @@ func (th TransactionHeap) Swap(i, j int) {
 }
 
 func (th *TransactionHeap) Push(x interface{}) {
-	*th = append(*th, x.(*UTXOTransaction))
+	*th = append(*th, x.(*Transaction))
 }
 
 func (th *TransactionHeap) Pop() interface{} {
@@ -40,18 +40,18 @@ func NewMempool() *Mempool {
 	return &Mempool{Transactions: th}
 }
 
-func (mp *Mempool) AddTransaction(tx *UTXOTransaction) {
+func (mp *Mempool) AddTransaction(tx *Transaction) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 	heap.Push(mp.Transactions, tx)
 }
 
-func (mp *Mempool) GetTransactions(count int) []*UTXOTransaction {
+func (mp *Mempool) GetTransactions(count int) []*Transaction {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
-	var txs []*UTXOTransaction
+	var txs []*Transaction
 	for i := 0; i < count && mp.Transactions.Len() > 0; i++ {
-		tx := heap.Pop(mp.Transactions).(*UTXOTransaction)
+		tx := heap.Pop(mp.Transactions).(*Transaction)
 		txs = append(txs, tx)
 	}
 	return txs
