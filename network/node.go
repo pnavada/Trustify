@@ -130,7 +130,7 @@ func (n *Node) Start() {
 	go n.ListenForTCPConnections()
 
 	// Listen UDP
-	go ReceiveMessages()
+	go ReceiveMessages(n.ReadChannel)
 
 	time.Sleep(5 * time.Second)
 	go n.StartMining()
@@ -282,8 +282,7 @@ func (n *Node) HandleMessages() {
 	for {
 		select {
 		case inboundMessage := <-n.ReadChannel:
-			// Handle incoming message
-			fmt.Println("Received message:", string(inboundMessage.Data))
+			go n.handleIncomingMessage(inboundMessage)
 		case outboundMessage := <-n.WriteChannel:
 			conn, _ := n.TCPEgress.Get(outboundMessage.Recipient)
 			tcpConn := conn.(net.Conn)
@@ -292,14 +291,48 @@ func (n *Node) HandleMessages() {
 	}
 }
 
+func (n *Node) handleIncomingMessage(message InboundMessage) {
+	if len(message.Data) == 0 {
+		return
+	}
+
+	messageType := message.Data[0]
+	payload := message.Data[1:]
+
+	switch messageType {
+	case MessageTypeTransaction:
+		tx, signature, publicKey, err := deserializeTransactionMessage(payload)
+		if err != nil {
+			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n")
+			return
+		}
+		n.HandleIncomingTransaction(tx, signature, publicKey)
+	case MessageTypeBlock:
+		block := blockchain.DeserializeBlock(payload)
+		if block == nil {
+			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n")
+			return
+		}
+		n.HandleIncomingBlock(block)
+	default:
+		logger.ErrorLogger.Printf("Unknown message type %d from %s\n", messageType)
+	}
+}
+
 func (n *Node) BroadcastBlock(block *blockchain.Block) {
 	// Broadcast block to the network
 	// Broadcast the block data over the network to all peers
 	// do not use peer to peer multicasting instead use broadcasting
 
-	// COMPARED TO BROADCAST TRANSACTION, THIS WILL BE A BIT DIFFERENT
-	// The proof-of-work acts as a form of "implicit signature."
-	// It proves that a miner has expended computational resources to create the block.
+	// Print block data
+	logger.InfoLogger.Printf("Broadcasting block: %+v\n", block)
+
+	// Network broadcasting
+	err := SendBlock(block)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to broadcast transaction:", err)
+	}
+
 }
 
 func (n *Node) BroadcastTransaction(tx *blockchain.Transaction) {
