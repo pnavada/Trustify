@@ -51,11 +51,20 @@ func NewNode(cfg *config.Config) *Node {
 
 	cfgNode := cfg.Nodes[me]
 	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey), []byte(cfgNode.Wallet.PublicKey), []byte(cfgNode.Wallet.BitcoinAddress)) // Need to get self private key
-	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet)
+
+	// BestBlocksChannel := make(chan *GetBlocksResponse)
+	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet) // BestBlocksChannel
+
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to initialize blockchain:", err)
 		return nil
 	}
+
+	// getBlocksProtocol := blockchain.NewGetBlocksProtocol(
+	// 	Timeout: cfg.BlockchainSettings.Protocols.GetBlocksProtocol.Timeout,
+	// 	Host: host.Host,
+	// 	BestBlocksChannel: BestBlocksChannel,
+	// )
 
 	mempool := blockchain.NewMempool()
 

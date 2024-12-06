@@ -2,122 +2,95 @@ package blockchain
 
 import (
 	"bytes"
+	"errors"
 	"trustify/logger"
 )
 
+// Miner represents a miner in the blockchain system.
 type Miner struct {
-	Blockchain *Blockchain
-	Mempool    *Mempool
-	Wallet     *Wallet
+	Blockchain *Blockchain // Reference to the blockchain
+	Mempool    *Mempool    // Reference to the transaction pool
+	Wallet     *Wallet     // Wallet of the miner
 }
 
-func NewMiner(bc *Blockchain, mp *Mempool, wallet *Wallet) *Miner {
-	return &Miner{Blockchain: bc, Mempool: mp, Wallet: wallet}
+// NewMiner creates a new Miner instance.
+func NewMiner(blockchain *Blockchain, mempool *Mempool, wallet *Wallet) *Miner {
+	return &Miner{
+		Blockchain: blockchain,
+		Mempool:    mempool,
+		Wallet:     wallet,
+	}
 }
 
+// MineBlock mines a new block by selecting transactions, creating a block, performing proof of work, and adding it to the blockchain.
 func (m *Miner) MineBlock(blockSize int) (*Block, error) {
-	// Collect transactions, create block, perform proof of work
-	// This method should be called when there are enough transactions in the mempool
-	// form a block.
-	// The required block size is defined in the configuation object
-	// Then pick the required number of transactions from the mempool
-	// Add coinbase transactions to reward the miners and reviewers (if applicable).
-	// Use your best decision to position this logic
-	// Create the block using the NewBlock method
-	// The target hash is part of the configuration. Dont receive the confuguration object as a parameter
-	// USe intelligent ways to pass this data between objects
-	// Define the parameters where it makes the most sense to be a part of
-	// Perform proof of work to find the valid nonce for the block
-	// Add the block to the ledger and broadcast over the network
-	// Ensure there are enough transactions
+	logger.InfoLogger.Println("Starting block mining process")
 
-	// Get transactions from mempool
+	// Step 1: Retrieve transactions from the mempool.
 	transactions := m.Mempool.GetTransactions(blockSize)
+	if len(transactions) == 0 {
+		logger.ErrorLogger.Println("Mempool is empty. Aborting mining process.")
+		return nil, errors.New("not enough transactions to mine a block")
+	}
+	logger.InfoLogger.Printf("Retrieved %d transactions from mempool", len(transactions))
 
-	// Add coinbase transaction
+	// Step 2: Create a coinbase transaction to reward the miner.
 	coinbaseTx := m.createCoinbaseTransaction(len(m.Blockchain.Ledger))
 
-	// Add transaction fee and review rewards
-	for _, tx := range transactions {
-		switch data := tx.Data.(type) {
-		case *PurchaseTransactionData:
-			// Handle ProductTransactionData
-			logger.InfoLogger.Println("Processing PurchaseTransactionData for transaction:", tx.ID)
-			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
-				Address: m.Wallet.BitcoinAddress,
-				Amount:  tx.GetTransactionFee(),
-			})
-			// Add your logic for ProductTransactionData here
-		case *ReviewTransactionData:
-			// Handle ReviewTransactionData
-			logger.InfoLogger.Println("Processing ReviewTransactionData for transaction:", tx.ID)
-			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
-				Address: data.ReviewerAddress,
-				Amount:  m.Blockchain.ReviewReward,
-			})
-			// Add your logic for ReviewTransactionData here
-		default:
-			logger.InfoLogger.Println("Unknown transaction data type for transaction:", tx.ID)
-		}
-	}
+	// Step 3: Process transactions for additional rewards.
+	m.processTransactionRewards(transactions, coinbaseTx)
 
+	// Include the coinbase transaction at the beginning.
 	transactions = append([]*Transaction{coinbaseTx}, transactions...)
 
-	// Create new block
+	// Step 4: Create a new block.
 	previousHash := m.Blockchain.LatestBlock().Header.BlockHash
 	targetHash := m.Blockchain.LatestBlock().Header.TargetHash
 	block, err := NewBlock(transactions, previousHash, targetHash)
 	if err != nil {
-		logger.ErrorLogger.Println("Failed to create new block:", err)
+		logger.ErrorLogger.Printf("Failed to create new block: %v", err)
 		return nil, err
 	}
+	logger.InfoLogger.Println("New block created successfully")
 
-	// Perform Proof of Work
-	m.ProofOfWork(block)
+	// Step 5: Perform Proof of Work.
+	m.performProofOfWork(block)
 
-	// Add block to blockchain
-	err = m.Blockchain.AddBlock(block)
-	if err != nil {
-		logger.ErrorLogger.Println("Failed to add block to blockchain:", err)
+	// Step 6: Add the mined block to the blockchain.
+	if err := m.Blockchain.AddBlock(block); err != nil {
+		logger.ErrorLogger.Printf("Failed to add block to blockchain: %v", err)
 		return nil, err
 	}
+	logger.InfoLogger.Printf("Block successfully added to blockchain with hash: %x", block.Header.BlockHash)
 
-	// Broadcast block
-	// Assuming n.BroadcastBlock(block) exists
-	logger.InfoLogger.Println("New block mined and added to blockchain:", block.Header.BlockHash)
 	return block, nil
-
 }
 
-func (m *Miner) ProofOfWork(b *Block) {
-	// Perform POW to find valid nonce
-	// Here  the block is the block for which the nonce is to be found
-	// The nonce is intiialized to zero and incremented until the hash of the block is less than the target hash
-	// Basic idea is to find a nonce such that the hash of the block is less than the target hash
+// performProofOfWork calculates a valid nonce for the block by solving the proof-of-work puzzle.
+func (m *Miner) performProofOfWork(block *Block) {
+	logger.InfoLogger.Println("Starting proof of work")
 	var hash []byte
-	nonce := int64(0)
-	for {
-		b.Header.Nonce = nonce
-		hash = HashObject(Serialize(b))
-		if bytes.Compare(hash, b.Header.TargetHash) < 0 {
-			b.Header.BlockHash = hash
-			logger.InfoLogger.Println("Proof of Work successful with nonce:", nonce)
-			break
-		} else {
-			nonce++
-		}
-	}
+	var nonce int64
 
+	for {
+		block.Header.Nonce = nonce
+		hash = HashObject(Serialize(block))
+		if bytes.Compare(hash, block.Header.TargetHash) < 0 {
+			block.Header.BlockHash = hash
+			logger.InfoLogger.Printf("Proof of work completed. Nonce: %d, Hash: %x", nonce, hash)
+			break
+		}
+		nonce++
+	}
 }
 
-func (m *Miner) createCoinbaseTransaction(numBlocks int) *Transaction {
-	// Create a coinbase transaction rewarding the miner
+// createCoinbaseTransaction creates a coinbase transaction to reward the miner.
+func (m *Miner) createCoinbaseTransaction(blockHeight int) *Transaction {
+	logger.InfoLogger.Println("Creating coinbase transaction for miner reward")
 	coinbaseTx := &Transaction{
 		Outputs: make([]*UTXOTransaction, 1),
 		Data: CoinbaseTransactionData{
-			BlockHeight: numBlocks,
+			BlockHeight: blockHeight,
 		},
 	}
 	coinbaseTx.Outputs[0] = &UTXOTransaction{
@@ -129,6 +102,31 @@ func (m *Miner) createCoinbaseTransaction(numBlocks int) *Transaction {
 		TxHash:  coinbaseTx.ID,
 		TxIndex: 0,
 	}
-	logger.InfoLogger.Println("Coinbase transaction created for miner reward")
+	logger.InfoLogger.Println("Coinbase transaction successfully created")
 	return coinbaseTx
+}
+
+// processTransactionRewards adds transaction fees and review rewards to the coinbase transaction.
+func (m *Miner) processTransactionRewards(transactions []*Transaction, coinbaseTx *Transaction) {
+	logger.InfoLogger.Println("Processing transaction rewards")
+	for _, tx := range transactions {
+		switch data := tx.Data.(type) {
+		case *PurchaseTransactionData:
+			logger.InfoLogger.Printf("Adding transaction fee for purchase transaction: %x", tx.ID)
+			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
+				ID:      coinbaseTx.Outputs[0].ID,
+				Address: m.Wallet.BitcoinAddress,
+				Amount:  tx.GetTransactionFee(),
+			})
+		case *ReviewTransactionData:
+			logger.InfoLogger.Printf("Adding review reward for transaction: %x", tx.ID)
+			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
+				ID:      coinbaseTx.Outputs[0].ID,
+				Address: data.ReviewerAddress,
+				Amount:  m.Blockchain.ReviewReward,
+			})
+		default:
+			logger.ErrorLogger.Printf("Unknown transaction type for transaction: %x", tx.ID)
+		}
+	}
 }
