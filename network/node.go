@@ -9,7 +9,7 @@ import (
 	"time"
 	"trustify/blockchain"
 	"trustify/config"
-	"trustify/crypto"
+	"trustify/cryptography"
 	"trustify/logger"
 
 	"github.com/libp2p/go-libp2p"
@@ -373,7 +373,7 @@ func (n *Node) BroadcastTransaction(tx *blockchain.Transaction) {
 
 	Serialized := blockchain.SerializeTransaction(tx)
 	hashed := blockchain.HashObject(Serialized)
-	signature, err := crypto.Sign(hashed, n.Wallet.PrivateKey)
+	signature, err := cryptography.Sign(hashed, n.Wallet.PrivateKey)
 
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to sign transaction:", err)
@@ -408,7 +408,7 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 	// Verify the signature
 	serialized := blockchain.SerializeTransaction(tx)
 	hashed := blockchain.HashObject(serialized)
-	if !crypto.VerifySignature(hashed, signature, publicKey) {
+	if !cryptography.VerifySignature(hashed, signature, publicKey) {
 		logger.ErrorLogger.Println("Transaction signature verification failed")
 		return
 	}
