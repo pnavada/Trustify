@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"math/big"
+	"trustify/logger"
 )
 
 // Use the most preferred cryptographic library for generating key pairs and signing data in blockchain applications.
@@ -25,6 +26,11 @@ func Sign(data []byte, privateKey []byte) ([]byte, error) {
 	// Decode the private key
 
 	// Decode the private key from PEM format
+
+	// log the private key and data
+	logger.InfoLogger.Printf("Private Key: %x\n", privateKey)
+	logger.InfoLogger.Printf("Data: %x\n", data)
+
 	block, _ := pem.Decode(privateKey)
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block containing private key")

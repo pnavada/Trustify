@@ -140,10 +140,6 @@ func (n *Node) Start() {
 		go n.SendMessageToHost(peer, []byte("hello from "+n.hostName))
 	}
 
-	// TEST SEND UDP
-	message := []byte("Hello, network peers! I am " + n.hostName)
-	go BroadcastMessage(message)
-
 	// Handle transactions from configuration file
 	for _, tx := range n.Config.Nodes[n.hostName].Transactions {
 		go n.handleConfigTransaction(tx)
@@ -171,11 +167,10 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 			tx.Fee,
 			tx.ProductID,
 		)
-		if transaction != nil {
+		if transaction == nil {
 			logger.ErrorLogger.Println("Failed to create purchase transaction")
 			return
 		}
-
 	case "review":
 		logger.InfoLogger.Println("Processing review transaction")
 		// Create a review transaction
@@ -184,7 +179,7 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 			tx.ProductID,
 			tx.Rating,
 		)
-		if transaction != nil {
+		if transaction == nil {
 			logger.ErrorLogger.Println("Failed to create review transaction")
 			return
 		}
@@ -301,21 +296,23 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 
 	switch messageType {
 	case MessageTypeTransaction:
+		logger.InfoLogger.Printf("Received transaction from %s\n", message.Sender)
 		tx, signature, publicKey, err := deserializeTransactionMessage(payload)
 		if err != nil {
-			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n")
+			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n", message.Sender)
 			return
 		}
 		n.HandleIncomingTransaction(tx, signature, publicKey)
 	case MessageTypeBlock:
+		logger.InfoLogger.Printf("Received block from %s\n", message.Sender)
 		block := blockchain.DeserializeBlock(payload)
 		if block == nil {
-			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n")
+			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n", message.Sender)
 			return
 		}
 		n.HandleIncomingBlock(block)
 	default:
-		logger.ErrorLogger.Printf("Unknown message type %d from %s\n", messageType)
+		logger.ErrorLogger.Printf("Unknown message type %v , msg: %v from %v\n", messageType, string(message.Data), message.Sender)
 	}
 }
 
