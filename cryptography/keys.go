@@ -3,88 +3,69 @@ package cryptography
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
-	"crypto/sha256"
 	"crypto/x509"
-	"encoding/asn1"
 	"encoding/pem"
-	"errors"
+	"fmt"
 	"math/big"
-	"trustify/logger"
 )
 
-// Use the most preferred cryptographic library for generating key pairs and signing data in blockchain applications.
-// TO-DO: Use a secure cryptographic library to generate an elliptic curve (or RSA) key pair.
-// TO-DO: Ensure private keys are securely stored and not exposed.
-// TO-DO: Gracefully handle invalid inputs, such as malformed keys or signatures.
-
-func Sign(data []byte, privateKey []byte) ([]byte, error) {
-	// Use the most preferred cryptographic and hashing algorithms for blockchain applications.
-	// Create a digital signature for the provided data using the private key.
-	// Hash the data to create a digest.
-	// Use the private key to sign the hashed data.
-	// Return the signature in a format suitable for verification (e.g., DER-encoded).
-	// Decode the private key
-
-	// Decode the private key from PEM format
-
-	// log the private key and data
-	logger.InfoLogger.Printf("Private Key: %x\n", privateKey)
-	logger.InfoLogger.Printf("Data: %x\n", data)
-
-	block, _ := pem.Decode(privateKey)
-	if block == nil {
-		return nil, errors.New("failed to decode PEM block containing private key")
+// parsePrivateKey decodes the PEM-encoded private key from the configuration.
+func ParsePrivateKey(pemKey string) (*ecdsa.PrivateKey, error) {
+	block, _ := pem.Decode([]byte(pemKey))
+	if block == nil || block.Type != "EC PRIVATE KEY" {
+		return nil, fmt.Errorf("failed to decode PEM block containing private key")
 	}
 
-	var privKey *ecdsa.PrivateKey
-	var err error
-
-	if block.Type == "EC PRIVATE KEY" {
-		privKey, err = x509.ParseECPrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-	} else if block.Type == "PRIVATE KEY" {
-		keyInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-		var ok bool
-		privKey, ok = keyInterface.(*ecdsa.PrivateKey)
-		if !ok {
-			return nil, errors.New("not ECDSA private key")
-		}
-	} else {
-		return nil, errors.New("unknown private key type")
-	}
-
-	// Hash the data using SHA-256
-	hash := sha256.Sum256(data)
-
-	// Sign the hashed data using ECDSA
-	r, s, err := ecdsa.Sign(rand.Reader, privKey, hash[:])
+	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse EC private key: %w", err)
 	}
 
-	// Encode the signature as ASN.1 DER
-	type ecdsaSignature struct {
-		R, S *big.Int
-	}
-	signature, err := asn1.Marshal(ecdsaSignature{r, s})
+	return privateKey, nil
+}
+
+// serializePublicKey serializes the ECDSA public key to a byte slice.
+func SerializePublicKey(pubKey *ecdsa.PublicKey) ([]byte, error) {
+	derPubKey, err := x509.MarshalPKIXPublicKey(pubKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to marshal public key: %w", err)
+	}
+	return derPubKey, nil
+}
+
+// deserializePublicKey deserializes the ECDSA public key from a byte slice.
+func DeserializePublicKey(derPubKey []byte) (*ecdsa.PublicKey, error) {
+	pubKeyInterface, err := x509.ParsePKIXPublicKey(derPubKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse DER public key: %w", err)
 	}
 
+	pubKey, ok := pubKeyInterface.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("not ECDSA public key")
+	}
+
+	return pubKey, nil
+}
+
+func SignMessage(privateKey *ecdsa.PrivateKey, hashedMessage []byte) ([]byte, error) {
+	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hashedMessage[:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign message: %w", err)
+	}
+
+	// Serialize the signature as r || s
+	signature := append(r.Bytes(), s.Bytes()...)
 	return signature, nil
 }
 
-func VerifySignature(hash []byte, signature []byte, publicKeyBytes []byte) bool {
-	// Log the public key, hash, and signature in hexadecimal format
-	logger.InfoLogger.Printf("Public Key: %x\n", publicKeyBytes)
-	logger.InfoLogger.Printf("Hash: %x\n", hash)
-	logger.InfoLogger.Printf("Signature: %x\n", signature)
+// verifySignature verifies the ECDSA signature.
+func VerifySignature(pubKey *ecdsa.PublicKey, hashedMessage []byte, signature []byte) bool {
+	// Split the signature into r and s values
+	keyLen := (pubKey.Curve.Params().BitSize + 7) / 8
+	r := new(big.Int).SetBytes(signature[:keyLen])
+	s := new(big.Int).SetBytes(signature[keyLen:])
 
-	// TODO
-	return false
+	// Verify the signature
+	return ecdsa.Verify(pubKey, hashedMessage[:], r, s)
 }

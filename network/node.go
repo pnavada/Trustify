@@ -53,7 +53,7 @@ func NewNode(cfg *config.Config) *Node {
 	utxoSet := blockchain.NewUTXOSet()
 
 	cfgNode := cfg.Nodes[me]
-	wallet, err := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey)) // Need to get self private key
+	wallet, err := blockchain.NewWallet(cfgNode.Wallet.PrivateKey) // Need to get self private key
 
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to initialize wallet:", err)
@@ -373,18 +373,25 @@ func (n *Node) BroadcastTransaction(tx *blockchain.Transaction) {
 
 	Serialized := blockchain.SerializeTransaction(tx)
 	hashed := blockchain.HashObject(Serialized)
-	signature, err := cryptography.Sign(hashed, n.Wallet.PrivateKey)
+	signature, err := cryptography.SignMessage(n.Wallet.PrivateKey, hashed)
 
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to sign transaction:", err)
 		return
 	}
 
+	// Serialize public key for broadcasting
+	publicKey, err := cryptography.SerializePublicKey(n.Wallet.PublicKey)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to serialize public key:", err)
+		return
+	}
+
 	// Print tx, signature and public key
-	logger.InfoLogger.Printf("Transaction: %+v, Signature : %+v and Public Key: %+v are ready for braodcasting\n", tx, signature, n.Wallet.PublicKey)
+	logger.InfoLogger.Printf("Transaction: %+v, Signature : %+v and Public Key: %+v are ready for braodcasting\n", tx, signature, publicKey)
 
 	// Network broadcasting
-	err = SendTransaction(tx, signature, n.Wallet.PublicKey)
+	err = SendTransaction(tx, signature, publicKey)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to broadcast transaction:", err)
 	}
@@ -408,7 +415,15 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 	// Verify the signature
 	serialized := blockchain.SerializeTransaction(tx)
 	hashed := blockchain.HashObject(serialized)
-	if !cryptography.VerifySignature(hashed, signature, publicKey) {
+
+	// Deserialize the public key
+	pubKey, err := cryptography.DeserializePublicKey(publicKey)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to deserialize public key:", err)
+		return
+	}
+
+	if !cryptography.VerifySignature(pubKey, hashed, signature) {
 		logger.ErrorLogger.Println("Transaction signature verification failed")
 		return
 	}

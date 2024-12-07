@@ -3,10 +3,8 @@ package blockchain
 import (
 	"crypto/ecdsa"
 	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
 	"errors"
-	"trustify/config"
+	"trustify/cryptography"
 	"trustify/logger"
 
 	"golang.org/x/crypto/ripemd160"
@@ -14,64 +12,37 @@ import (
 
 type Wallet struct {
 	BitcoinAddress []byte
-	PublicKey      []byte
-	PrivateKey     []byte
+	PublicKey      *ecdsa.PublicKey
+	PrivateKey     *ecdsa.PrivateKey
 	UTXOs          []*UTXOTransaction
 }
 
-func NewWallet(privateKeyPEM []byte) (*Wallet, error) {
-	// Decode the PEM-encoded private key
-	block, _ := pem.Decode(privateKeyPEM)
-	if block == nil {
-		return nil, errors.New("invalid private key format")
-	}
-
-	var privKey *ecdsa.PrivateKey
-	var err error
-
-	switch block.Type {
-	case "EC PRIVATE KEY":
-		privKey, err = x509.ParseECPrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-	case "PRIVATE KEY":
-		keyInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-		var ok bool
-		privKey, ok = keyInterface.(*ecdsa.PrivateKey)
-		if !ok {
-			return nil, errors.New("not ECDSA private key")
-		}
-	default:
-		return nil, errors.New("unknown private key type")
-	}
-
-	// Serialize the public key in compressed format (33 bytes)
-	// pubKeyBytes := append(
-	// 	[]byte{},
-	// 	privKey.PublicKey.X.Bytes()...,
-	// )
-	// You can choose to serialize in compressed or uncompressed format based on your needs
-	// Here's how to serialize in compressed format:
-	pubKeyCompressed := config.CompressPublicKey(&privKey.PublicKey)
-
-	// Generate the Bitcoin address as bytes
-	bitcoinAddress, err := calculateBitcoinAddress(pubKeyCompressed)
+func NewWallet(privateKeyPEM string) (*Wallet, error) {
+	// Parse the private key
+	privateKey, err := cryptography.ParsePrivateKey(privateKeyPEM)
 	if err != nil {
-		return nil, errors.New("failed to calculate Bitcoin address")
+		return nil, err
 	}
 
-	// Log Bitcoin address
-	logger.InfoLogger.Printf("Bitcoin address: %x and %s\n", bitcoinAddress, string(bitcoinAddress))
+	// Serialize the public key
+	publicKey, err := cryptography.SerializePublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	bitcoinAddress, err := calculateBitcoinAddress(publicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// PRINT the bitcoin address
+	logger.InfoLogger.Println("Bitcoin address:", string(bitcoinAddress))
 
 	// Return the wallet
 	return &Wallet{
 		BitcoinAddress: bitcoinAddress,
-		PublicKey:      pubKeyCompressed,
-		PrivateKey:     privateKeyPEM,
+		PublicKey:      &privateKey.PublicKey,
+		PrivateKey:     privateKey,
 		UTXOs:          make([]*UTXOTransaction, 0),
 	}, nil
 }
