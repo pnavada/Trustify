@@ -56,7 +56,12 @@ nodes:
     wallet:
       bitcoin_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
       public_key: 028a91bc3dfa9e0b0d7ea589d1778919a62f0f28ac98fbe914be803c917190d2fb2500b2d858beee3b829358a5a1ef11a679980ba87d1c13e326ff038a832c8c
-      private_key: f1c47a354d64d5edd4c993761dc89718336ccc0e6b5b5886dca766e0846b23b6
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHQCAQEEIFBgj02BMzpu0r4K+kV+z2bDL7ptmYPH93XaYYW3UoAEoAcGBSuBBAAK
+        oUQDQgAEo2tq3IjdO4lF4E2D/oEahc+Gjs1jNU42FmcQroCJbGTTtMzjCkmHOSGk
+        wIr+ODeEFfrczYhvZ5vQ6BcvN7FdZw==
+        -----END EC PRIVATE KEY-----
     transactions:
       - type: purchase
         amount: 5
@@ -176,4 +181,3 @@ nodes:
         seller_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
         product_id: product11
         fee: 3
-
