@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"container/heap"
 	"sync"
+	"trustify/logger"
 )
-
-// Feel free to correct any mistakes or define new methods if needed
 
 type TransactionHeap []*Transaction
 
@@ -44,7 +43,12 @@ func NewMempool() *Mempool {
 func (mp *Mempool) AddTransaction(tx *Transaction) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
-	heap.Push(mp.Transactions, tx)
+
+	if mp.hasTransaction(tx) {
+		logger.ErrorLogger.Println("Duplicate transaction received: ", tx.ID, " Ignoring it!")
+	} else {
+		heap.Push(mp.Transactions, tx)
+	}
 }
 
 func (mp *Mempool) RemoveTransaction(tx *Transaction) {
@@ -69,9 +73,7 @@ func (tx *Transaction) Equals(other *Transaction) bool {
 	return bytes.Equal(hashedTx, hashedOther)
 }
 
-func (mp *Mempool) HasTransaction(tx *Transaction) bool {
-	mp.Mutex.Lock()
-	defer mp.Mutex.Unlock()
+func (mp *Mempool) hasTransaction(tx *Transaction) bool { // THIS IS WITHOUT LOCKING and should be called only after locking
 	for _, t := range *mp.Transactions {
 		if t.Equals(tx) {
 			return true

@@ -22,162 +22,188 @@ genesis_block:
     data: "Geneis Data"
     outputs:
       - id: genesis_tx_0:0
-        address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
+        address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
         amount: 50
       - id: genesis_tx_0:1
-        address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+        address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
         amount: 50
       - id: genesis_tx_0:2
-        address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
+        address: 00176f2e828ae8d64317cd3e8488bbd8861d823ab0d0f66d4b
         amount: 50
       - id: genesis_tx_0:3
-        address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
+        address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
         amount: 50
       - id: genesis_tx_0:4
-        address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
+        address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
         amount: 50
       - id: genesis_tx_0:5
-        address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
+        address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
         amount: 50
       - id: genesis_tx_0:6
-        address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
+        address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
         amount: 50
       - id: genesis_tx_0:7
-        address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+        address: 007866a156d4e4912978417423097dab590f4a05904c38e2e9
         amount: 50
       - id: genesis_tx_0:8
-        address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
+        address: 00525dca97c52b3c158a88ed60db2512c6ddbbc4371f37463d
         amount: 50
       - id: genesis_tx_0:9
-        address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
+        address: 00435c47b5bac025121573cdaee69784c2e35bbe3cf9a7766a
         amount: 50
 nodes:
   node1:
     wallet:
-      bitcoin_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
-      public_key: 028a91bc3dfa9e0b0d7ea589d1778919a62f0f28ac98fbe914be803c917190d2fb2500b2d858beee3b829358a5a1ef11a679980ba87d1c13e326ff038a832c8c
       private_key: |
         -----BEGIN EC PRIVATE KEY-----
-        MHQCAQEEIFBgj02BMzpu0r4K+kV+z2bDL7ptmYPH93XaYYW3UoAEoAcGBSuBBAAK
-        oUQDQgAEo2tq3IjdO4lF4E2D/oEahc+Gjs1jNU42FmcQroCJbGTTtMzjCkmHOSGk
-        wIr+ODeEFfrczYhvZ5vQ6BcvN7FdZw==
+        MHcCAQEEIMnr3kKzH/bk0aOcKompiuNJbYUP8xRIfFpwrP2ZbMUIoAoGCCqGSM49
+        AwEHoUQDQgAEe74UOfAykGY01Zt53w4Cjw0FDrSRvHyDpo3+4BqCPAHkFJmLTijS
+        6cE5CbOkOmfmiexYMHnHFlQXxsFXTJmbTA==
         -----END EC PRIVATE KEY-----
     transactions:
       - type: purchase
         amount: 5
         delay: 1
-        buyer_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
-        seller_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
+        buyer_address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
+        seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
         product_id: product1
         fee: 10
   node2:
     wallet:
-      bitcoin_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
-      public_key: eb64ee93351eed58ee8e43926a2aa2e529375be8b88175dc60d2997a5c15f31bbf1b7be3c6d5c89915d1d45b85931006aef0fb9c885de6e5a53c6cdcbab3230a
-      private_key: 7d599f0af9879d2a69e14217ec8c26865e0df11c68850206662d35a37e82acd2
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 3
-        buyer_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
-        seller_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
-        product_id: product3
-        fee: 2
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIAhJyAnOwAnlplwa0TIgtnHFCr0Bt0+bLiDTWQX4t51goAoGCCqGSM49
+        AwEHoUQDQgAEcZBpfwItB268s2NsVxsuj1dC2YTXZVGgWtvzQlMmyf6izKCzQMYT
+        rFo7ve7DJgw0Kdcjy9k1rfcTNlELxi5k1w==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 3
+    #     buyer_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
+    #     seller_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
+    #     product_id: product3
+    #     fee: 2
   node3:
     wallet:
-      bitcoin_address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
-      public_key: c0e315ccf0ecf5cbc604e9f967c4ab9b886c764dca8a32d62eee51c70685c049b794e31a39ea48f6c47a4d12dba405c23a0d4e98c851bc7812c216bc94b836c0
-      private_key: ddc03158e0bc4d6b47e7dbc281695e6bd65b64fe6337c2b147b6a11f5daad1bd
-    transactions:
-      - type: review
-        delay: 20
-        reviewer_address: 14Y7SGrKDTSZMPwKboUJ24QDEZzDijRecA
-        product_id: product4
-        rating: 5
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIJKPhXOk+ZDF9vikO/rDJlPTz6KDFpKS+2ahGa/rVSqFoAoGCCqGSM49
+        AwEHoUQDQgAE0gUmmKWZXCQZhHcR5hB1MAXdN1RKGXTOUoynb64CiBzF42aC/mYS
+        61U6DNzhYFPb/CQY9EpkPYeXARr5Vi+KiA==
+        -----END EC PRIVATE KEY-----
+
+    # transactions:
+    #   - type: review
+    #     delay: 20
+    #     reviewer_address: 00176f2e828ae8d64317cd3e8488bbd8861d823ab0d0f66d4b
+    #     product_id: product4
+    #     rating: 5
   node4:
     wallet:
-      bitcoin_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
-      public_key: fb71dba1fcc31248afe9707011bee944c5adc7da92d841527a06b9def58930a63c408ac430d581e2d58c3407bdb0d512618460677e200349258ca96d8945c445
-      private_key: c52916aa2c96b2befec0870eba3f2a0319bce01da696b47336e836c4159d15e4
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 8
-        buyer_address: 18YF6UgqTMEFcHUiLE6ZNZV1TKrovNxmo3
-        seller_address: 14K9AroriYaED8rbxNVG1N9PbW15U15gXS
-        product_id: product5
-        fee: 5
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIKCJhr6/3BrRVvKqt2xnc6M24HkqplS2LKzy1bNtn4CvoAoGCCqGSM49
+        AwEHoUQDQgAEvNFwZvV/xhkNCb1a8LhZP75yBsU4X1RUM7QQc2yhm6ckgyjDijw9
+        6DPmnXTBL/s9mHcYanKec3OMZ1hs3fVOfw==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 8
+    #     buyer_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
+    #     seller_address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
+    #     product_id: product5
+    #     fee: 5
   node5:
     wallet:
-      bitcoin_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
-      public_key: f45bc9a3ed23b9c72a5949ad34d2aefc5ed7da34bde4bc7a1235f1b4c72312341f412e123c412ae84c562e8f5a34124bc623cd7e5df13e6b4123cf
-      private_key: 5d7c5a4a1234123cd4f7da341bcd1342cd5d4b7c412e8fa
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 7
-        buyer_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
-        seller_address: 12tKkGXm5FjDKM49VVWfhks1PYo1S8ZbEk
-        product_id: product6
-        fee: 2
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIArWP8mrzGNUpkNbzWijCQsHMVx7+wv+dJ0mMPZDHe6AoAoGCCqGSM49
+        AwEHoUQDQgAEqYTZyzdpZBjMFb48RXvpjtFBD+MZbfIzO6U+P2cE4ClrsIDI7yft
+        N/XpQfhEfFnoMA9WD+Xw5egwGikpnGTeXQ==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 7
+    #     buyer_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
+    #     seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
+    #     product_id: product6
+    #     fee: 2
   node6:
     wallet:
-      bitcoin_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
-      public_key: 120abc423fcb9e0d8a6b5e7a1234b8d23ce76fda9b582e842142e3cdba9f342412a9e234
-      private_key: 9bc4e89241dfac234eb5829428bd3241fc89241dcef34a9234cd19b2e7dc2134
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 12
-        buyer_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
-        seller_address: 1A3xyzBdfJYQL8KTZcXefGfEF1pT9XB1qL
-        product_id: product7
-        fee: 3
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIF5ufSze9c9focVh8Gtr7/BEeF9F/YW0P1cjWJSIqR+NoAoGCCqGSM49
+        AwEHoUQDQgAE+AJWCFeoOdn+uhVp3aw3w8Dw+SGZcLpRrBg/fK/6KX646m4fsSPQ
+        ix0tJLswDIKUXgWLrgFXgaDfHohBZztHfA==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 12
+    #     buyer_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
+    #     seller_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
+    #     product_id: product7
+    #     fee: 3
   node7:
     wallet:
-      bitcoin_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
-      public_key: 99bc4e76d23abc9e67d123b582a124fc8d1234234f67bc892a123dcbf8b34298d5a9a123
-      private_key: 87623bcfd342a76e8941abc124cd89f723d21a8bc142f392abc721a9342bdc9
-    transactions:
-      - type: review
-        delay: 15
-        reviewer_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
-        product_id: product8
-        rating: 4
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIIU6xUUXcNiRo0fVFYL90r+Wact+1OB6wXNq6TZxwqlUoAoGCCqGSM49
+        AwEHoUQDQgAEfyRCQjZ1gg8NsKkatszHxuOIcHwXsHQJWh4T7hzHy0Fkv/f2fiiA
+        5YHh4NWfJSofQ9YOSvSBmMssn32pGaEUcg==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: review
+    #     delay: 15
+    #     reviewer_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
+    #     product_id: product8
+    #     rating: 4
   node8:
     wallet:
-      bitcoin_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
-      public_key: 10cd76a3bfc421abc2d874f892d1a8e76b1234d8a92c42f3e5dcbf67d19abc21
-      private_key: 231cd8f89abc76d5e92a21ab341dcbf9e8a1234cd789fa123cbf84d23c9b7d
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 14
-        buyer_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
-        seller_address: 14XZ1xA2bP34Vx29PKXEX98TZ78XY7Mn9Z
-        product_id: product9
-        fee: 2
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIH08x+hKMRXlXvwnpySn9aR+2UFxhxM3Zirvidlt9mSUoAoGCCqGSM49
+        AwEHoUQDQgAEFTxPcYSNfV8aZTlDCP5BHPmXd2+RoEgsxV9ug+Dgf3K2u78PBvKo
+        Wz1iqVlhK0sv1pkyhNxFb244cDp3hEaaNw==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 14
+    #     buyer_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+    #     seller_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
+    #     product_id: product9
+    #     fee: 2
   node9:
     wallet:
-      bitcoin_address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
-      public_key: 54bcd123dfc72e76ab1234f9d21abc8f3e9ab124f89dc76ea92b3428c9dc5b21
-      private_key: 231cd8a23bcf78d9ea23f89b342dc5e98a1d342b781fc8a923cd34b81f2a3d
-    transactions:
-      - type: review
-        delay: 18
-        reviewer_address: 1XYZAfXLmn9Z9Z9PKXZ89XYXZNMnYXA32
-        product_id: product10
-        rating: 5
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIK1+ATyTKcO5wAZNPQHuBFuzRiyfvr5K+rID8Pi+Cft2oAoGCCqGSM49
+        AwEHoUQDQgAECEh7yPk8efXhVYl1gXU1Msq0cT32nn6RKKGxuDcTk/Zj1BZK9nuo
+        9uWvtYV3cJi4dRV8lQIt+WvggRcGCK//Qg==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: review
+    #     delay: 18
+    #     reviewer_address: 00525dca97c52b3c158a88ed60db2512c6ddbbc4371f37463d
+    #     product_id: product10
+    #     rating: 5
   node10:
     wallet:
-      bitcoin_address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
-      public_key: a567bc123d9ea23cd78921b324df6f812cba23df84b9dc67e342a891bc5f91a3
-      private_key: 8abc23df678ea9bc542b31dfc8a134bd76e98f91cd7e2a45b23189a2f5b7e9a
-    transactions:
-      - type: purchase
-        amount: 5
-        delay: 19
-        buyer_address: 1P3ZAfXLmn9ZZX89XYXZNMn9ZAA342MN8
-        seller_address: 1XY2ABzDfXK29EXMn9Z9XZ1Y789PKX9XZA
-        product_id: product11
-        fee: 3
+      private_key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIFaNWaTqSR3AFs1hNzOFYrAuPjP9zgMbbztjSpLX8eunoAoGCCqGSM49
+        AwEHoUQDQgAE4/aSCAR8GoZ05S5hIINhvPhs+AMAN/edhmjMhfnprKU1MgbNNyD/
+        ArXHy1+sVpHeYIl+lH16ivQAAnmuoamgqA==
+        -----END EC PRIVATE KEY-----
+    # transactions:
+    #   - type: purchase
+    #     amount: 5
+    #     delay: 19
+    #     buyer_address: 00435c47b5bac025121573cdaee69784c2e35bbe3cf9a7766a
+    #     seller_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
+    #     product_id: product11
+    #     fee: 3

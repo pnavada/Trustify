@@ -53,7 +53,12 @@ func NewNode(cfg *config.Config) *Node {
 	utxoSet := blockchain.NewUTXOSet()
 
 	cfgNode := cfg.Nodes[me]
-	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey), []byte(cfgNode.Wallet.PublicKey), []byte(cfgNode.Wallet.BitcoinAddress)) // Need to get self private key
+	wallet, err := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey)) // Need to get self private key
+
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to initialize wallet:", err)
+		return nil
+	}
 
 	mempool := blockchain.NewMempool()
 	host, err := libp2p.New() // TODO: Verify if this is the correct way to initialize host
@@ -73,9 +78,11 @@ func NewNode(cfg *config.Config) *Node {
 
 	// Initialize UTXOSet with genesis block's transactions
 	for _, tx := range chain.Ledger[0].Transactions {
-
 		for _, output := range tx.Outputs {
-			utxoSet.Add(output) // TODO: create a copy of output
+			utxoSet.Add(output) // TODO: create a copy of output?
+			// print output address and wallet bitcoin address
+			logger.InfoLogger.Printf("Output address: %x, Wallet Bitcoin address: %x\n", output.Address, wallet.BitcoinAddress)
+
 			if bytes.Equal(output.Address, wallet.BitcoinAddress) {
 				wallet.UTXOs = append(wallet.UTXOs, output)
 			}
@@ -228,17 +235,12 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 		return
 	}
 
-	// Make sure its not a duplicate transaction
-	if n.Mempool.HasTransaction(transaction) {
-		logger.ErrorLogger.Println("Duplicate transaction received:", transaction.ID)
-		return
-	}
-
 	// Add the transaction to the mempool
 	n.Mempool.AddTransaction(transaction)
 
 	// Broadcast the transaction to the network
-	n.BroadcastTransaction(transaction)
+	go n.BroadcastTransaction(transaction)
+
 }
 
 // Network communication
@@ -417,17 +419,11 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 		return
 	}
 
-	// Make sure its not a duplicate transaction
-	if n.Mempool.HasTransaction(tx) {
-		logger.ErrorLogger.Println("Duplicate transaction received:", tx.ID)
-		return
-	}
-
 	// Add the transaction to the mempool
 	n.Mempool.AddTransaction(tx)
 
 	// Broadcast the transaction to the network
-	n.BroadcastTransaction(tx)
+	go n.BroadcastTransaction(tx)
 }
 
 func (n *Node) HandleIncomingBlock(block *blockchain.Block) error {

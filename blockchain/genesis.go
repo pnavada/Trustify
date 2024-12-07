@@ -45,12 +45,18 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 	// Convert the transactions from ConfigUTXOTransaction to UTXOTransaction
 	var transactions []*UTXOTransaction
 	for _, tx := range genesisConfig.Transactions.Outputs {
+		// Hex decode the address
+		address, err := hex.DecodeString(tx.Address)
+		if err != nil || len(address) == 0 {
+			logger.ErrorLogger.Printf("Invalid address: %s\n", tx.Address)
+			return nil, errors.New("invalid address in genesis block")
+		}
 		transaction := &UTXOTransaction{
 			ID: &UTXOTransactionID{
 				TxHash:  blockHash,
 				TxIndex: len(transactions),
 			},
-			Address: []byte(tx.Address),
+			Address: address,
 			Amount:  tx.Amount,
 		}
 
