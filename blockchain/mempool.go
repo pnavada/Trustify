@@ -47,6 +47,17 @@ func (mp *Mempool) AddTransaction(tx *Transaction) {
 	heap.Push(mp.Transactions, tx)
 }
 
+func (mp *Mempool) RemoveTransaction(tx *Transaction) {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+	for i, t := range *mp.Transactions {
+		if t.Equals(tx) {
+			heap.Remove(mp.Transactions, i)
+			break
+		}
+	}
+}
+
 func (tx *Transaction) Equals(other *Transaction) bool {
 	SerializedTx := SerializeTransaction(tx)
 	hashedTx := HashObject(SerializedTx)

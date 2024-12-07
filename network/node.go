@@ -11,6 +11,9 @@ import (
 	"trustify/config"
 	"trustify/crypto"
 	"trustify/logger"
+
+	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/network"
 )
 
 type Node struct {
@@ -52,21 +55,21 @@ func NewNode(cfg *config.Config) *Node {
 	cfgNode := cfg.Nodes[me]
 	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey), []byte(cfgNode.Wallet.PublicKey), []byte(cfgNode.Wallet.BitcoinAddress)) // Need to get self private key
 
+	mempool := blockchain.NewMempool()
+	host, err := libp2p.New() // TODO: Verify if this is the correct way to initialize host
+
+	getBlocksProtocol := blockchain.NewGetBlocksProtocol(
+		host,
+		cfg.BlockchainSettings.Protocols.GetBlocks.Timeout,
+	)
+
 	// BestBlocksChannel := make(chan *GetBlocksResponse)
-	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet) // BestBlocksChannel
+	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet, getBlocksProtocol, mempool) // BestBlocksChannel
 
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to initialize blockchain:", err)
 		return nil
 	}
-
-	// getBlocksProtocol := blockchain.NewGetBlocksProtocol(
-	// 	Timeout: cfg.BlockchainSettings.Protocols.GetBlocksProtocol.Timeout,
-	// 	Host: host.Host,
-	// 	BestBlocksChannel: BestBlocksChannel,
-	// )
-
-	mempool := blockchain.NewMempool()
 
 	// Initialize UTXOSet with genesis block's transactions
 	for _, tx := range chain.Ledger[0].Transactions {
@@ -107,6 +110,33 @@ func NewNode(cfg *config.Config) *Node {
 
 	// logger.InfoLogger.Println("Node initialized with address:", wallet.BitcoinAddress)
 	return node
+}
+
+// HandleGetBlocksRequest handles incoming GetBlocks requests from peers
+func (n *Node) HandleGetBlocksRequest(s network.Stream) {
+	defer s.Close()
+
+	var request blockchain.GetBlocksRequest
+	if err := blockchain.Receive(s, &request); err != nil {
+		logger.ErrorLogger.Printf("Failed to receive request: %v", err)
+		return
+	}
+
+	blocks, err := n.Blockchain.GetBlocksSinceHash(request.LastKnownHash)
+	if err != nil {
+		logger.ErrorLogger.Printf("Error retrieving blocks since hash: %v", err)
+		blockchain.Send(s, blockchain.GetBlocksResponse{Success: false})
+		return
+	}
+
+	response := blockchain.GetBlocksResponse{
+		Blocks:  blocks,
+		Success: true,
+	}
+
+	if err := blockchain.Send(s, response); err != nil {
+		logger.ErrorLogger.Printf("Failed to send response: %v", err)
+	}
 }
 
 func (n *Node) StartMining() {

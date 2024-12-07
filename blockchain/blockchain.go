@@ -2,6 +2,8 @@ package blockchain
 
 import (
 	"bytes"
+	"errors"
+	"sort"
 	"trustify/config"
 	"trustify/logger"
 )
@@ -14,14 +16,12 @@ type Blockchain struct {
 	ConfirmationDepth int
 	UTXOSet           *UTXOSet
 	TargetHash        []byte
-	// BestBlocksChannel chan *GetBlocksResponse
+	GetBlocksProtocol *GetBlocksProtocol
+	Mempool           *Mempool
 }
 
 // NewBlockchain initializes a new blockchain with the provided genesis block and settings.
-func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *config.ConfigBlockchainSettings, utxoSet *UTXOSet,
-
-// bestBlockChannel chan *GetBlocksResponse
-) (*Blockchain, error) {
+func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *config.ConfigBlockchainSettings, utxoSet *UTXOSet, getBlocksProtocol *GetBlocksProtocol, mempool *Mempool) (*Blockchain, error) {
 	block, err := convertConfigGenesisBlockToBlock(genesisBlock)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to convert genesis block:", err)
@@ -37,29 +37,13 @@ func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *
 		ConfirmationDepth: blockchainSettings.BlockConfirmationDepth,
 		UTXOSet:           utxoSet,
 		TargetHash:        []byte(blockchainSettings.TargetHash),
-		// BestBlocksChannel: bestBlockChannel,
+		GetBlocksProtocol: getBlocksProtocol,
+		Mempool:           mempool,
 	}
-	// bc.ProcessBestBlocksChannel()
 
 	logger.InfoLogger.Println("Blockchain successfully initialized with genesis block.")
 	return bc, nil
 }
-
-// ProcessBestBlocksChannel listens for messages on the BestBlocksChannel and processes them.
-// func (bc *Blockchain) ProcessBestBlocksChannel() {
-// 	for {
-// 		select {
-// 		case response := <-bc.BestBlocksChannel:
-// 			for _, block := range response.Blocks {
-// 				if err := bc.AddBlock(block); err != nil {
-// 					logger.ErrorLogger.Printf("Failed to add block from BestBlocksChannel: %v\n", err)
-// 				} else {
-// 					logger.InfoLogger.Printf("Block added from BestBlocksChannel: %x\n", block.Header.BlockHash)
-// 				}
-// 			}
-// 		}
-// 	}
-// }
 
 // AddBlock adds a block to the blockchain after validating it.
 func (bc *Blockchain) AddBlock(block *Block) error {
@@ -70,14 +54,152 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 
 	lastBlock := bc.LatestBlock()
 	if !bytes.Equal(block.Header.PreviousHash, lastBlock.Header.BlockHash) {
-		// Request missing blocks from the network using the GetBlocks protocol
-		// go bc.GetBlocksProtocol.GetBlocks(lastBlock.Header.BlockHash)
+		err := bc.resolveFork(lastBlock.Header.BlockHash)
+		if err != nil {
+			logger.ErrorLogger.Println("Failed to resolve fork:", err)
+			return err
+		}
 	}
 
 	bc.Ledger = append(bc.Ledger, block)
 	logger.InfoLogger.Printf("Block added to blockchain: %x\n", block.Header.BlockHash)
 	bc.CommitBlock()
 	return nil
+}
+
+// resolveFork resolves forks in the blockchain by choosing the best chain.
+func (bc *Blockchain) resolveFork(startHash []byte) error {
+	for {
+		// Start the getblocks protocol to fetch blocks from peers
+		err := bc.GetBlocksProtocol.GetBlocks(startHash)
+		if err != nil {
+			logger.ErrorLogger.Println("Failed to start getblocks:", err)
+			return err
+		}
+
+		// Wait for responses from BlocksChannel
+		responses := bc.waitForResponses()
+		if responses == nil {
+			logger.ErrorLogger.Println("No responses received from peers")
+			return errors.New("no responses received from peers")
+		}
+
+		// Process responses to extract blocks
+		allBlocks := bc.processResponses(responses)
+		if len(allBlocks) == 0 {
+			logger.ErrorLogger.Println("No valid blocks received from peers")
+			startBlock, err := bc.GetBlockByHash(startHash)
+			if err != nil {
+				return err
+			}
+			startHash = startBlock.Header.PreviousHash
+			continue
+		}
+
+		// Validate all blocks in each chain
+		if err := bc.validateChains(allBlocks); err != nil {
+			return err
+		}
+
+		// Choose the best chain based on length and transaction fees
+		bestChain := bc.chooseBestChain(allBlocks)
+		if bestChain == nil {
+			logger.ErrorLogger.Println("No valid chain found")
+			return errors.New("no valid chain found")
+		}
+
+		// Add unmatched blocks' transactions to the mempool
+		bc.addUnmatchedBlocksToMempool(startHash)
+
+		// Add the best chain to the ledger
+		bc.addBestChainToLedger(bestChain)
+
+		logger.InfoLogger.Println("Best chain added to ledger")
+		return nil
+	}
+}
+
+// validateChains validates all blocks in each chain.
+func (bc *Blockchain) validateChains(chains [][]*Block) error {
+	var validChains [][]*Block
+	for _, chain := range chains {
+		isValidChain := bc.isValidChain(chain)
+		if isValidChain {
+			validChains = append(validChains, chain)
+		}
+	}
+	if len(validChains) == 0 {
+		logger.ErrorLogger.Println("No valid chains found")
+		return errors.New("no valid chains found")
+	}
+	logger.InfoLogger.Printf("Found %d valid chains\n", len(validChains))
+	return nil
+}
+
+func (bc *Blockchain) isValidChain(chain []*Block) bool {
+	for _, blk := range chain {
+		if err := bc.ValidateBlock(blk); err != nil {
+			logger.ErrorLogger.Println("Block validation failed in chain:", err)
+			return false
+		}
+	}
+	return true
+}
+
+// addBestChainToLedger adds the best chain to the ledger.
+func (bc *Blockchain) addBestChainToLedger(bestChain []*Block) {
+	bc.Ledger = append(bc.Ledger, bestChain...)
+}
+
+// addUnmatchedBlocksToMempool adds unmatched blocks' transactions to the mempool.
+func (bc *Blockchain) addUnmatchedBlocksToMempool(startHash []byte) {
+
+	for i := len(bc.Ledger) - 1; i >= 0; i-- {
+		if bytes.Equal(bc.Ledger[i].Header.BlockHash, startHash) {
+			bc.Ledger = bc.Ledger[:i+1]
+			break
+		}
+		for _, tx := range bc.Ledger[i].Transactions {
+			bc.Mempool.RemoveTransaction(tx)
+		}
+	}
+
+}
+
+// waitForResponses waits for responses from peers.
+func (bc *Blockchain) waitForResponses() []*GetBlocksResponse {
+	var responses []*GetBlocksResponse
+	for {
+		select {
+		case response := <-bc.GetBlocksProtocol.BlocksChannel:
+			responses = append(responses, response)
+		default:
+			return responses
+		}
+	}
+}
+
+// chooseBestChain selects the best chain based on length and transaction fees.
+func (bc *Blockchain) chooseBestChain(chains [][]*Block) []*Block {
+	if len(chains) == 0 {
+		return nil
+	}
+
+	sort.Slice(chains, func(i, j int) bool {
+		if len(chains[i]) != len(chains[j]) {
+			return len(chains[i]) > len(chains[j])
+		}
+		var feeI, feeJ int64
+		for _, block := range chains[i] {
+			feeI += block.GetTransactionFee()
+		}
+		for _, block := range chains[j] {
+			feeJ += block.GetTransactionFee()
+		}
+		return feeI > feeJ
+	})
+
+	return chains[0]
 }
 
 // ValidateBlock performs all validations on a block before adding it to the blockchain.
@@ -177,6 +299,22 @@ func (bc *Blockchain) CommitBlock() {
 	}
 
 	logger.InfoLogger.Printf("Block at index %d committed successfully.\n", blockToCommitIndex)
+}
+
+// processResponses extracts blocks from received responses
+func (bc *Blockchain) processResponses(responses []*GetBlocksResponse) [][]*Block {
+	var allBlocks [][]*Block
+
+	for _, response := range responses {
+		if response.Success {
+			allBlocks = append(allBlocks, response.Blocks)
+		} else {
+			logger.ErrorLogger.Println("Received unsuccessful response from a peer")
+		}
+	}
+
+	logger.InfoLogger.Printf("Processed %d sets of blocks", len(allBlocks))
+	return allBlocks
 }
 
 // GetBlockByHash retrieves a block from the ledger by its hash.
@@ -311,4 +449,24 @@ func (bc *Blockchain) hasDuplicateReview(reviewer []byte, product string) bool {
 		}
 	}
 	return false
+}
+
+// getBlocksSinceHash retrieves all blocks from the ledger after a given hash
+func (bc *Blockchain) GetBlocksSinceHash(lastKnownHash []byte) ([]*Block, error) {
+	blocks := bc.Ledger
+	startIndex := -1
+
+	// Find the index of the last known hash
+	for i, block := range blocks {
+		if bytes.Equal(block.Header.BlockHash, lastKnownHash) {
+			startIndex = i + 1
+			break
+		}
+	}
+
+	if startIndex == -1 {
+		return nil, errors.New("last known hash not found")
+	}
+
+	return blocks[startIndex:], nil
 }
