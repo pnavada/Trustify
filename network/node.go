@@ -50,7 +50,12 @@ func NewNode(cfg *config.Config) *Node {
 	utxoSet := blockchain.NewUTXOSet()
 
 	cfgNode := cfg.Nodes[me]
-	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey)) // Need to get self private key
+	wallet, err := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey)) // Need to get self private key
+
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to initialize wallet:", err)
+		return nil
+	}
 
 	// BestBlocksChannel := make(chan *GetBlocksResponse)
 	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet) // BestBlocksChannel

@@ -1,12 +1,14 @@
 package blockchain
 
 import (
+	"crypto/ecdsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"trustify/config"
 	"trustify/logger"
 
-	"github.com/btcsuite/btcd/btcec/v2"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -17,35 +19,61 @@ type Wallet struct {
 	UTXOs          []*UTXOTransaction
 }
 
-func NewWallet(privateKeyPEM []byte) *Wallet {
+func NewWallet(privateKeyPEM []byte) (*Wallet, error) {
 	// Decode the PEM-encoded private key
 	block, _ := pem.Decode(privateKeyPEM)
 	if block == nil {
-		panic("Invalid private key format")
+		return nil, errors.New("invalid private key format")
 	}
 
-	// Parse the private key to obtain both private and public keys
-	_, publicKey := btcec.PrivKeyFromBytes(block.Bytes)
+	var privKey *ecdsa.PrivateKey
+	var err error
 
-	// Serialize the public key in compressed format
-	publicKeyBytes := publicKey.SerializeCompressed()
+	switch block.Type {
+	case "EC PRIVATE KEY":
+		privKey, err = x509.ParseECPrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+	case "PRIVATE KEY":
+		keyInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		var ok bool
+		privKey, ok = keyInterface.(*ecdsa.PrivateKey)
+		if !ok {
+			return nil, errors.New("not ECDSA private key")
+		}
+	default:
+		return nil, errors.New("unknown private key type")
+	}
+
+	// Serialize the public key in compressed format (33 bytes)
+	// pubKeyBytes := append(
+	// 	[]byte{},
+	// 	privKey.PublicKey.X.Bytes()...,
+	// )
+	// You can choose to serialize in compressed or uncompressed format based on your needs
+	// Here's how to serialize in compressed format:
+	pubKeyCompressed := config.CompressPublicKey(&privKey.PublicKey)
 
 	// Generate the Bitcoin address as bytes
-	bitcoinAddress, err := calculateBitcoinAddress(publicKeyBytes)
+	bitcoinAddress, err := calculateBitcoinAddress(pubKeyCompressed)
 	if err != nil {
-		panic("Failed to calculate Bitcoin address")
+		return nil, errors.New("failed to calculate Bitcoin address")
 	}
 
-	// print bitcoin address
-	logger.InfoLogger.Printf("Bitcoin address: %v and %v\n", bitcoinAddress, string(bitcoinAddress))
+	// Log Bitcoin address
+	logger.InfoLogger.Printf("Bitcoin address: %x and %s\n", bitcoinAddress, string(bitcoinAddress))
 
 	// Return the wallet
 	return &Wallet{
 		BitcoinAddress: bitcoinAddress,
-		PublicKey:      publicKeyBytes,
+		PublicKey:      pubKeyCompressed,
 		PrivateKey:     privateKeyPEM,
 		UTXOs:          make([]*UTXOTransaction, 0),
-	}
+	}, nil
 }
 
 func calculateBitcoinAddress(publicKey []byte) ([]byte, error) {

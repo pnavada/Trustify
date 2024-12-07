@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"os"
@@ -101,4 +102,14 @@ func LoadConfig(path string) (*Config, error) {
 
 	// Return the populated Config struct
 	return &cfg, nil
+}
+
+func CompressPublicKey(pubKey *ecdsa.PublicKey) []byte {
+	var compressed []byte
+	if pubKey.Y.Bit(0) == 0 {
+		compressed = append([]byte{0x02}, pubKey.X.Bytes()...)
+	} else {
+		compressed = append([]byte{0x03}, pubKey.X.Bytes()...)
+	}
+	return compressed
 }
