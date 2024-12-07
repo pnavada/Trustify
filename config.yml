@@ -22,7 +22,7 @@ genesis_block:
     data: "Geneis Data"
     outputs:
       - id: genesis_tx_0:0
-        address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
+        address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
         amount: 50
       - id: genesis_tx_0:1
         address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
@@ -64,7 +64,7 @@ nodes:
       - type: purchase
         amount: 5
         delay: 1
-        buyer_address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
+        buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
         seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
         product_id: product1
         fee: 10
@@ -112,7 +112,7 @@ nodes:
     #     amount: 5
     #     delay: 8
     #     buyer_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
-    #     seller_address: 0090e61985e29ef598873f1e64affb51314987da09c6353b81
+    #     seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
     #     product_id: product5
     #     fee: 5
   node5:
