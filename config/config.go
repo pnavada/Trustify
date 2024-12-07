@@ -40,9 +40,7 @@ type ConfigNode struct {
 }
 
 type ConfigWallet struct {
-	BitcoinAddress string `yaml:"bitcoin_address"`
-	PublicKey      string `yaml:"public_key"`
-	PrivateKey     string `yaml:"private_key"`
+	PrivateKey string `yaml:"private_key"`
 }
 
 type ConfigTransaction struct {

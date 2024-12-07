@@ -86,9 +86,21 @@ func VerifySignature(hash []byte, signature []byte, publicKey []byte) bool {
 	// Return true if the signature is valid, otherwise false.
 	// Ensure the public key is correctly formatted and corresponds to the private key used for signing.
 
+	// log the public key, hash, and signature
+	logger.InfoLogger.Printf("Public Key: %x\n", publicKey)
+	logger.InfoLogger.Printf("Hash: %x\n", hash)
+	logger.InfoLogger.Printf("Signature: %x\n", signature)
+
 	// Decode the public key
-	block, _ := pem.Decode(publicKey)
+	// Encode the public key to PEM format
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKey,
+	})
+
+	block, _ := pem.Decode(publicKeyPEM)
 	if block == nil {
+		logger.ErrorLogger.Println("Failed to decode PEM block containing public key")
 		return false
 	}
 
@@ -98,19 +110,23 @@ func VerifySignature(hash []byte, signature []byte, publicKey []byte) bool {
 	if block.Type == "PUBLIC KEY" {
 		pubKeyInterface, err = x509.ParsePKIXPublicKey(block.Bytes)
 		if err != nil {
+			logger.ErrorLogger.Printf("Failed to parse PKIX public key: %v\n", err)
 			return false
 		}
 	} else if block.Type == "EC PUBLIC KEY" {
 		pubKeyInterface, err = x509.ParsePKIXPublicKey(block.Bytes)
 		if err != nil {
+			logger.ErrorLogger.Printf("Failed to parse EC public key: %v\n", err)
 			return false
 		}
 	} else {
+		logger.ErrorLogger.Println("Unknown public key type")
 		return false
 	}
 
 	pubKey, ok := pubKeyInterface.(*ecdsa.PublicKey)
 	if !ok {
+		logger.ErrorLogger.Println("Not ECDSA public key")
 		return false
 	}
 
@@ -121,9 +137,16 @@ func VerifySignature(hash []byte, signature []byte, publicKey []byte) bool {
 	var sig ecdsaSignature
 	_, err = asn1.Unmarshal(signature, &sig)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to unmarshal signature: %v\n", err)
 		return false
 	}
 
 	// Verify the signature using ECDSA
-	return ecdsa.Verify(pubKey, hash[:], sig.R, sig.S)
+	valid := ecdsa.Verify(pubKey, hash[:], sig.R, sig.S)
+	if !valid {
+		logger.ErrorLogger.Println("Signature verification failed")
+	} else {
+		logger.InfoLogger.Println("Signature verification succeeded")
+	}
+	return valid
 }

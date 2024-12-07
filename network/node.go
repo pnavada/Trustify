@@ -50,7 +50,7 @@ func NewNode(cfg *config.Config) *Node {
 	utxoSet := blockchain.NewUTXOSet()
 
 	cfgNode := cfg.Nodes[me]
-	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey), []byte(cfgNode.Wallet.PublicKey), []byte(cfgNode.Wallet.BitcoinAddress)) // Need to get self private key
+	wallet := blockchain.NewWallet([]byte(cfgNode.Wallet.PrivateKey)) // Need to get self private key
 
 	// BestBlocksChannel := make(chan *GetBlocksResponse)
 	chain, err := blockchain.NewBlockchain(&cfg.GenesisBlock, &cfg.BlockchainSettings, utxoSet) // BestBlocksChannel
@@ -60,19 +60,12 @@ func NewNode(cfg *config.Config) *Node {
 		return nil
 	}
 
-	// getBlocksProtocol := blockchain.NewGetBlocksProtocol(
-	// 	Timeout: cfg.BlockchainSettings.Protocols.GetBlocksProtocol.Timeout,
-	// 	Host: host.Host,
-	// 	BestBlocksChannel: BestBlocksChannel,
-	// )
-
 	mempool := blockchain.NewMempool()
 
 	// Initialize UTXOSet with genesis block's transactions
 	for _, tx := range chain.Ledger[0].Transactions {
-
 		for _, output := range tx.Outputs {
-			utxoSet.Add(output) // TODO: create a copy of output
+			utxoSet.Add(output) // TODO: create a copy of output?
 			if bytes.Equal(output.Address, wallet.BitcoinAddress) {
 				wallet.UTXOs = append(wallet.UTXOs, output)
 			}
@@ -198,17 +191,12 @@ func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {
 		return
 	}
 
-	// Make sure its not a duplicate transaction
-	if n.Mempool.HasTransaction(transaction) {
-		logger.ErrorLogger.Println("Duplicate transaction received:", transaction.ID)
-		return
-	}
-
 	// Add the transaction to the mempool
 	n.Mempool.AddTransaction(transaction)
 
 	// Broadcast the transaction to the network
-	n.BroadcastTransaction(transaction)
+	go n.BroadcastTransaction(transaction)
+
 }
 
 // Network communication
@@ -387,17 +375,11 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 		return
 	}
 
-	// Make sure its not a duplicate transaction
-	if n.Mempool.HasTransaction(tx) {
-		logger.ErrorLogger.Println("Duplicate transaction received:", tx.ID)
-		return
-	}
-
 	// Add the transaction to the mempool
 	n.Mempool.AddTransaction(tx)
 
 	// Broadcast the transaction to the network
-	n.BroadcastTransaction(tx)
+	go n.BroadcastTransaction(tx)
 }
 
 func (n *Node) HandleIncomingBlock(block *blockchain.Block) error {
