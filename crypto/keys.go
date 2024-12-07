@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
@@ -122,7 +121,7 @@ func parseCompressedPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	}
 
 	x := new(big.Int).SetBytes(pubKeyBytes[1:])
-	curve := elliptic.P256() // Replace with secp256k1 if necessary
+	curve := btcec.S256() // Replaceed with secp256k1
 
 	// Compute Y coordinate
 	y, err := decompressY(x, prefix)

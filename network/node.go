@@ -80,6 +80,9 @@ func NewNode(cfg *config.Config) *Node {
 	for _, tx := range chain.Ledger[0].Transactions {
 		for _, output := range tx.Outputs {
 			utxoSet.Add(output) // TODO: create a copy of output?
+			// print output address and wallet bitcoin address
+			logger.InfoLogger.Printf("Output address: %x, Wallet Bitcoin address: %x\n", output.Address, wallet.BitcoinAddress)
+
 			if bytes.Equal(output.Address, wallet.BitcoinAddress) {
 				wallet.UTXOs = append(wallet.UTXOs, output)
 			}
