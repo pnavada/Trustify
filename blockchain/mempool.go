@@ -44,7 +44,7 @@ func (mp *Mempool) AddTransaction(tx *Transaction) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
-	if mp.hasTransaction(tx) {
+	if mp.HasTransaction(tx) {
 		logger.ErrorLogger.Println("Duplicate transaction received: ", tx.ID, " Ignoring it!")
 	} else {
 		heap.Push(mp.Transactions, tx)
@@ -73,7 +73,7 @@ func (tx *Transaction) Equals(other *Transaction) bool {
 	return bytes.Equal(hashedTx, hashedOther)
 }
 
-func (mp *Mempool) hasTransaction(tx *Transaction) bool { // THIS IS WITHOUT LOCKING and should be called only after locking
+func (mp *Mempool) HasTransaction(tx *Transaction) bool { // THIS IS WITHOUT LOCKING and should be called only after locking
 	for _, t := range *mp.Transactions {
 		if t.Equals(tx) {
 			return true

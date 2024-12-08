@@ -434,11 +434,13 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 		return
 	}
 
-	// Add the transaction to the mempool
-	n.Mempool.AddTransaction(tx)
+	if !n.Mempool.HasTransaction(tx) {
+		// Add the transaction to the mempool
+		n.Mempool.AddTransaction(tx)
 
-	// Broadcast the transaction to the network
-	go n.BroadcastTransaction(tx)
+		// Broadcast the transaction to the network
+		go n.BroadcastTransaction(tx)
+	}
 }
 
 func (n *Node) HandleIncomingBlock(block *blockchain.Block) error {
