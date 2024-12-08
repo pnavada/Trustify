@@ -350,11 +350,16 @@ func (bc *Blockchain) ValidateTransaction(tx *Transaction, utxoSet *UTXOSet) err
 	// Verify signatures, double-spending, etc.
 
 	// Separate handling for Purchase and Review transactions
+
 	switch data := tx.Data.(type) {
 	case *PurchaseTransactionData:
 		return bc.validatePurchaseTransaction(tx, data, utxoSet)
 	case *ReviewTransactionData:
 		return bc.validateReviewTransaction(data)
+	case PurchaseTransactionData:
+		return bc.validatePurchaseTransaction(tx, &data, utxoSet)
+	case ReviewTransactionData:
+		return bc.validateReviewTransaction(&data)
 	default:
 		logger.ErrorLogger.Println("Invalid transaction type detected")
 		return ErrInvalidTransactionType
