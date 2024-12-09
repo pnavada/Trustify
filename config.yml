@@ -68,6 +68,13 @@ nodes:
         seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
         product_id: product1
         fee: 10
+      - type: purchase
+        amount: 10
+        delay: 3
+        buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
+        seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
+        product_id: product2
+        fee: 10
   node2:
     wallet:
       private_key: |
@@ -76,14 +83,14 @@ nodes:
         AwEHoUQDQgAEcZBpfwItB268s2NsVxsuj1dC2YTXZVGgWtvzQlMmyf6izKCzQMYT
         rFo7ve7DJgw0Kdcjy9k1rfcTNlELxi5k1w==
         -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 3
-    #     buyer_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
-    #     seller_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
-    #     product_id: product3
-    #     fee: 2
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 3
+        buyer_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
+        seller_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
+        product_id: product3
+        fee: 2
   node3:
     wallet:
       private_key: |
@@ -92,13 +99,12 @@ nodes:
         AwEHoUQDQgAE0gUmmKWZXCQZhHcR5hB1MAXdN1RKGXTOUoynb64CiBzF42aC/mYS
         61U6DNzhYFPb/CQY9EpkPYeXARr5Vi+KiA==
         -----END EC PRIVATE KEY-----
-
-    # transactions:
-    #   - type: review
-    #     delay: 20
-    #     reviewer_address: 00176f2e828ae8d64317cd3e8488bbd8861d823ab0d0f66d4b
-    #     product_id: product4
-    #     rating: 5
+    transactions:
+      - type: review
+        delay: 20
+        reviewer_address: 00176f2e828ae8d64317cd3e8488bbd8861d823ab0d0f66d4b
+        product_id: product4
+        rating: 5
   node4:
     wallet:
       private_key: |
@@ -107,14 +113,14 @@ nodes:
         AwEHoUQDQgAEvNFwZvV/xhkNCb1a8LhZP75yBsU4X1RUM7QQc2yhm6ckgyjDijw9
         6DPmnXTBL/s9mHcYanKec3OMZ1hs3fVOfw==
         -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 8
-    #     buyer_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
-    #     seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
-    #     product_id: product5
-    #     fee: 5
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 8
+        buyer_address: 007d1bbc5ba566e5c3c15886aa162455db2d9a9f33bc89909d
+        seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65
+        product_id: product5
+        fee: 5
   node5:
     wallet:
       private_key: |

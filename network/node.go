@@ -434,7 +434,14 @@ func (n *Node) HandleIncomingTransaction(tx *blockchain.Transaction, signature [
 		return
 	}
 
-	if !n.Mempool.HasTransaction(tx) {
+	tran, exists := n.Mempool.HasTransaction(tx)
+	if exists {
+		logger.InfoLogger.Println("Transaction already in mempool")
+		// log the details of both the transactions
+		logger.InfoLogger.Printf("Existing transaction: %+v\n", tran)
+		logger.InfoLogger.Printf("New transaction: %+v\n", tx)
+		return
+	} else {
 		// Add the transaction to the mempool
 		n.Mempool.AddTransaction(tx)
 
