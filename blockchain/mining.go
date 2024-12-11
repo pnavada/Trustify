@@ -66,7 +66,7 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 		logger.ErrorLogger.Printf("Failed to add block to blockchain: %v", err)
 		return nil, err
 	}
-	logger.InfoLogger.Printf("Block successfully added to blockchain with hash: %x", block.Header.BlockHash)
+	logger.InfoLogger.Printf("Block successfully added to blockchain with hash: %x. Blockchain length is now: %d", block.Header.BlockHash, len(m.Blockchain.Ledger))
 
 	return block, nil
 }

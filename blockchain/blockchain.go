@@ -234,16 +234,22 @@ func (bc *Blockchain) ValidateBlock(block *Block) error {
 	if !bc.ValidateProofOfWork(block, bc.TargetHash) {
 		logger.ErrorLogger.Println("Invalid proof of work")
 		return ErrInvalidProofOfWork
+	} else {
+		logger.InfoLogger.Println("Block's proof of work is valid.")
 	}
 
 	if !bc.ValidateMerkleRoot(block) {
 		logger.ErrorLogger.Println("Invalid Merkle root")
 		return ErrInvalidMerkleRoot
+	} else {
+		logger.InfoLogger.Println("Block's Merkle root is valid.")
 	}
 
 	if !bc.ValidateTimestamp(block) {
 		logger.ErrorLogger.Println("Invalid timestamp")
 		return ErrInvalidTimestamp
+	} else {
+		logger.InfoLogger.Println("Block's timestamp is valid.")
 	}
 
 	for _, tx := range block.Transactions {
@@ -286,11 +292,12 @@ func (bc *Blockchain) ValidateMerkleRoot(block *Block) bool {
 func (bc *Blockchain) ValidateTimestamp(block *Block) bool {
 	lastBlock := bc.LatestBlock()
 	isValid := block.Header.Timestamp > lastBlock.Header.Timestamp
-	// Print both timestamps for debugging
-	logger.InfoLogger.Printf("Last block timestamp: %d, Current block timestamp: %d\n", lastBlock.Header.Timestamp, block.Header.Timestamp)
+
 	if !isValid {
-		logger.ErrorLogger.Println("Block timestamp is invalid.")
+		// Print both timestamps for debugging
+		logger.ErrorLogger.Printf("Block timestamp is invalid. Last block timestamp: %d, Current block timestamp: %d\n", lastBlock.Header.Timestamp, block.Header.Timestamp)
 	}
+
 	return isValid
 }
 

@@ -129,7 +129,7 @@ func ReceiveMessages(readChannel chan InboundMessage) error {
 
 	logger.InfoLogger.Printf("Listening for UDP messages on port %d...\n", Port)
 
-	buffer := make([]byte, 4096) // Adjust buffer size as needed
+	buffer := make([]byte, 1024*1024) // 1 MB buffer size
 	for {
 		n, remoteAddr, err := conn.ReadFrom(buffer)
 
@@ -210,15 +210,23 @@ func deserializeTransactionMessage(data []byte) (*blockchain.Transaction, []byte
 
 // SendBlock serializes and broadcasts a block.
 func SendBlock(block *blockchain.Block) error {
-	blockData := blockchain.SerializeBlock(block)
-	if blockData == nil {
+	serializedBlock := blockchain.SerializeBlock(block)
+	if serializedBlock == nil {
 		return fmt.Errorf("failed to serialize block")
 	}
 
-	// Construct the message with the type header
+	// Construct the message with the type header and length
 	var buf bytes.Buffer
 	buf.WriteByte(byte(MessageTypeBlock)) // Message type
-	buf.Write(blockData)                  // Serialized block
+
+	// Write the length of the serialized block
+	err := binary.Write(&buf, binary.BigEndian, uint32(len(serializedBlock)))
+	if err != nil {
+		return fmt.Errorf("failed to write block length: %v", err)
+	}
+
+	// Write the serialized block
+	buf.Write(serializedBlock)
 
 	// Broadcast the message
 	return BroadcastMessage(buf.Bytes())

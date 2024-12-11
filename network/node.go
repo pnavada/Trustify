@@ -2,11 +2,12 @@ package network
 
 import (
 	"bytes"
-	"encoding/hex"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"sync"
 	"time"
 	"trustify/blockchain"
 	"trustify/config"
@@ -14,9 +15,9 @@ import (
 	"trustify/logger"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -32,6 +33,8 @@ type Node struct {
 	ReadChannel  chan InboundMessage
 	WriteChannel chan OutboundMessage
 	hostName     string
+	ownIPs       map[string]bool
+	ipMutex      sync.RWMutex
 }
 
 // Context - blockchain package files
@@ -137,12 +140,62 @@ func NewNode(cfg *config.Config) *Node {
 		ReadChannel:  make(chan InboundMessage),
 		WriteChannel: make(chan OutboundMessage),
 		hostName:     me,
+		ownIPs:       make(map[string]bool),
 	}
+
+	// Collect the node's own IP addresses
+	node.collectOwnIPs()
 
 	logger.InfoLogger.Printf("Node initialized: %+v\n", node)
 
 	// logger.InfoLogger.Println("Node initialized with address:", wallet.BitcoinAddress)
 	return node
+}
+
+// collectOwnIPs gathers all local IP addresses of the node.
+func (n *Node) collectOwnIPs() {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to get network interfaces: %v\n", err)
+		return
+	}
+
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // Skip interfaces that are down
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			logger.ErrorLogger.Printf("Failed to get addresses for interface %s: %v\n", iface.Name, err)
+			continue
+		}
+
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+
+			if ip == nil || ip.IsLoopback() {
+				continue // Skip loopback addresses
+			}
+
+			ip = ip.To4()
+			if ip == nil {
+				continue // Skip non-IPv4 addresses
+			}
+
+			n.ipMutex.Lock()
+			n.ownIPs[ip.String()] = true
+			n.ipMutex.Unlock()
+		}
+	}
+
+	logger.InfoLogger.Printf("Collected own IP addresses: %v\n", n.ownIPs)
 }
 
 // HandleGetBlocksRequest handles incoming GetBlocks requests from peers
@@ -177,8 +230,17 @@ func (n *Node) StartMining() {
 		blockSize := n.Config.BlockchainSettings.BlockSize
 		// logger.InfoLogger.Println("Number of transaction in mempool:", n.Mempool.Transactions.Len())
 		if n.Mempool.Transactions.Len() >= blockSize {
-			block, _ := n.Miner.MineBlock(blockSize)
-			n.BroadcastBlock(block)
+			block, err := n.Miner.MineBlock(blockSize)
+			if err != nil {
+				logger.ErrorLogger.Println("Failed to mine block:", err)
+				continue
+			}
+			if block != nil && block.Header != nil {
+				n.BroadcastBlock(block)
+			} else {
+				// Log block and block header
+				logger.InfoLogger.Printf("Block: %+v\n", block)
+			}
 		}
 	}
 }
@@ -348,7 +410,20 @@ func (n *Node) HandleMessages() {
 }
 
 func (n *Node) handleIncomingMessage(message InboundMessage) {
-	if len(message.Data) == 0 {
+	// Extract sender's IP address as a string
+	senderIP, _, err := net.SplitHostPort(message.Sender.String())
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to parse sender address %v: %v\n", message.Sender, err)
+		return
+	}
+
+	// Check if the sender is the node itself
+	n.ipMutex.RLock()
+	isOwnMessage := n.ownIPs[senderIP]
+	n.ipMutex.RUnlock()
+
+	if isOwnMessage {
+		logger.InfoLogger.Printf("Ignoring own broadcast message from %s\n", senderIP)
 		return
 	}
 
@@ -365,12 +440,24 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 		}
 		n.HandleIncomingTransaction(tx, signature, publicKey)
 	case MessageTypeBlock:
-		logger.InfoLogger.Printf("Received block from %s\n", message.Sender)
-		block := blockchain.DeserializeBlock(payload)
-		logger.InfoLogger.Printf("Received block: %v\n", block)
-		if block == nil {
-			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n", message.Sender)
+		if len(message.Data) < 5 { // 1 byte for type + 4 bytes for length
+			logger.ErrorLogger.Println("Received block data too short")
 			return
+		}
+
+		logger.InfoLogger.Printf("Received block from sender %v with payload %v\n", message.Sender, payload)
+
+		// Read the length of the serialized block
+		length := binary.BigEndian.Uint32(message.Data[1:5])
+		if int(length) > len(message.Data[5:]) {
+			logger.ErrorLogger.Printf("Declared block length %d exceeds received data %d\n", length, len(message.Data[5:]))
+			return
+		}
+
+		serializedBlock := message.Data[5 : 5+length]
+		block := blockchain.DeserializeBlock(serializedBlock)
+		if block == nil {
+			logger.ErrorLogger.Println("Failed to deserialize block from UDP data")
 		}
 		n.HandleIncomingBlock(block)
 	default:
@@ -385,7 +472,10 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 
 	// Print block data
 	logger.InfoLogger.Printf("Broadcasting block: %+v\n", block)
-	logger.InfoLogger.Printf("Block's merkle root: %v\n", hex.EncodeToString(block.Header.MerkleRoot))
+
+	// Log the block and block header
+	logger.InfoLogger.Printf("Block: %+v\n", block)
+	logger.InfoLogger.Printf("Block Header: %+v\n", block.Header)
 
 	// Network broadcasting
 	err := SendBlock(block)
