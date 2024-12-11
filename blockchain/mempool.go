@@ -45,7 +45,7 @@ func (mp *Mempool) AddTransaction(tx *Transaction) {
 	defer mp.Mutex.Unlock()
 
 	heap.Push(mp.Transactions, tx)
-	logger.InfoLogger.Println("Transaction added to mempool: ", tx.ID)
+	logger.InfoLogger.Println("Transaction added to mempool: ", tx.Data, " Transaction pool length: ", mp.Transactions.Len())
 }
 
 func (mp *Mempool) RemoveTransaction(tx *Transaction) {
