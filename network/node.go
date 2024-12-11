@@ -14,7 +14,10 @@ import (
 	"trustify/logger"
 
 	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/multiformats/go-multiaddr"
 )
 
 type Node struct {
@@ -63,6 +66,28 @@ func NewNode(cfg *config.Config) *Node {
 
 	mempool := blockchain.NewMempool()
 	host, err := libp2p.New() // TODO: Verify if this is the correct way to initialize host
+
+	// Initialize peers
+	for peerName, _ := range cfg.Nodes {
+		if peerName != me {
+			addr, err := GetAddrFromHostname(peerName)
+			if err != nil {
+				logger.ErrorLogger.Printf("Failed to resolve address for peer %s: %v\n", peerName, err)
+				continue
+			}
+			multiAddr, err := multiaddr.NewMultiaddr(addr.String())
+			if err != nil {
+				logger.ErrorLogger.Printf("Failed to convert address to multiaddr for peer %s: %v\n", peerName, err)
+				continue
+			}
+			host.Peerstore().AddAddr(peer.ID(peerName), multiAddr, peerstore.PermanentAddrTTL)
+		}
+	}
+
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to initialize host:", err)
+		return nil
+	}
 
 	getBlocksProtocol := blockchain.NewGetBlocksProtocol(
 		host,
@@ -164,6 +189,8 @@ func (n *Node) Start() {
 	// The node should create an outgoing connection to broadcast data over the network
 	// The nodes should start mining to add new blocks to blockchain
 	// Add additional methods or files as needed maintaining separation of concerns
+
+	n.Blockchain.GetBlocksProtocol.Host.SetStreamHandler(blockchain.GetBlocksProtocolID, n.HandleGetBlocksRequest)
 
 	// Start networking, transaction processing, mining
 	go n.ListenForTCPConnections()
