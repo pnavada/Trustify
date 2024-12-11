@@ -149,6 +149,7 @@ func (n *Node) HandleGetBlocksRequest(s network.Stream) {
 func (n *Node) StartMining() {
 	for {
 		blockSize := n.Config.BlockchainSettings.BlockSize
+		// logger.InfoLogger.Println("Number of transaction in mempool:", n.Mempool.Transactions.Len())
 		if n.Mempool.Transactions.Len() >= blockSize {
 			block, _ := n.Miner.MineBlock(blockSize)
 			n.BroadcastBlock(block)

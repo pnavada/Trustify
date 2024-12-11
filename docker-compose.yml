@@ -14,67 +14,67 @@ services:
     networks:
       - network1
 
-  node3:
-    image: trustify
-    hostname: "node3"
-    container_name: "node3"
-    networks:
-      - network1
+#   node3:
+#     image: trustify
+#     hostname: "node3"
+#     container_name: "node3"
+#     networks:
+#       - network1
   
-  node4:
-    image: trustify
-    hostname: "node4"
-    container_name: "node4"
-    networks:
-      - network1
+#   node4:
+#     image: trustify
+#     hostname: "node4"
+#     container_name: "node4"
+#     networks:
+#       - network1
 
-  # Nodes in Network 2
-  node7:
-    image: trustify
-    hostname: "node7"
-    container_name: "node7"
-    networks:
-      - network2
+#   # Nodes in Network 2
+#   node7:
+#     image: trustify
+#     hostname: "node7"
+#     container_name: "node7"
+#     networks:
+#       - network2
 
-  node8:
-    image: trustify
-    hostname: "node8"
-    container_name: "node8"
-    networks:
-      - network2
+#   node8:
+#     image: trustify
+#     hostname: "node8"
+#     container_name: "node8"
+#     networks:
+#       - network2
 
-  node9:
-    image: trustify
-    hostname: "node9"
-    container_name: "node9"
-    networks:
-      - network2
+#   node9:
+#     image: trustify
+#     hostname: "node9"
+#     container_name: "node9"
+#     networks:
+#       - network2
   
-  node10:
-    image: trustify
-    hostname: "node10"
-    container_name: "node10"
-    networks:
-      - network2
+#   node10:
+#     image: trustify
+#     hostname: "node10"
+#     container_name: "node10"
+#     networks:
+#       - network2
 
-  # Bridge Nodes
-  node5:
-    image: trustify
-    hostname: "node5"
-    container_name: "node5"
-    privileged: true
-    networks:
-      - network1
-      - network2
+#   # Bridge Nodes
+#   node5:
+#     image: trustify
+#     hostname: "node5"
+#     container_name: "node5"
+#     privileged: true
+#     networks:
+#       - network1
+#       - network2
 
-  node6:
-    image: trustify
-    hostname: "node6"
-    container_name: "node6"
-    privileged: true
-    networks:
-      - network1
-      - network2
+#   node6:
+#     image: trustify
+#     hostname: "node6"
+#     container_name: "node6"
+#     privileged: true
+#     networks:
+#       - network1
+#       - network2
 
 networks:
   network1:

@@ -88,14 +88,21 @@ nodes:
         amount: 5
         delay: 5
         buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        seller_address: 00ef349ef7ffba69d3ad1bd52723318138a5131b0dadf1f908 #4
+        seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
         product_id: product3
         fee: 2
-      - type: review
+      - type: purchase
+        amount: 5
         delay: 10
-        reviewer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #3
-        product_id: product3
-        rating: 5
+        buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
+        seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
+        product_id: product4
+        fee: 2
+      # - type: review
+      #   delay: 10
+      #   reviewer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #3
+      #   product_id: product3
+      #   rating: 5
   node3:
     wallet:
       private_key: |

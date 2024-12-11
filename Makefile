@@ -9,12 +9,12 @@ build:
 test1: build
 	docker compose -f $(COMPOSE_FILE_1) up -d --build
 	
-	@sleep 60
+	# @sleep 60
 	
-	@echo "Starting network partitions"
-	@bash ./partition.sh node5 trustify_network2 60 & \
-	 bash ./partition.sh node6 trustify_network1 60 & \
-	 wait
+	# @echo "Starting network partitions"
+	# @bash ./partition.sh node5 trustify_network2 60 & \
+	#  bash ./partition.sh node6 trustify_network1 60 & \
+	#  wait
 	
 
 .PHONY: down-test1
