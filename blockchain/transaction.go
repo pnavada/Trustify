@@ -1,14 +1,18 @@
 package blockchain
 
 import (
+	"sync"
+	"time"
 	"trustify/logger"
 )
 
 type Transaction struct {
-	ID      []byte
-	Inputs  []*UTXOTransaction
-	Outputs []*UTXOTransaction
-	Data    interface{}
+	ID        []byte
+	Inputs    []*UTXOTransaction
+	Outputs   []*UTXOTransaction
+	Data      interface{}
+	Timestamp int64  // Add timestamp field
+	Sequence  uint64 // Add sequence field for tracking order
 }
 
 type PurchaseTransactionData struct {
@@ -69,9 +73,11 @@ func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID
 	}
 
 	tx := &Transaction{
-		Inputs:  inputs,
-		Outputs: outputs,
-		Data:    txData,
+		Inputs:    inputs,
+		Outputs:   outputs,
+		Data:      txData,
+		Timestamp: time.Now().Unix(),        // Add timestamp
+		Sequence:  generateSequenceNumber(), // Implement this method
 	}
 
 	// Serialize the transaction and generate a hash
@@ -91,7 +97,9 @@ func NewReviewTransaction(w *Wallet, productID string, rating int) *Transaction 
 	}
 
 	tx := &Transaction{
-		Data: txData,
+		Data:      txData,
+		Timestamp: time.Now().Unix(),        // Add timestamp
+		Sequence:  generateSequenceNumber(), // Implement this method
 	}
 
 	// Serialize the transaction and generate a hash
@@ -100,4 +108,17 @@ func NewReviewTransaction(w *Wallet, productID string, rating int) *Transaction 
 	tx.ID = hashed
 	logger.InfoLogger.Println("New review transaction created:", tx.ID)
 	return tx
+}
+
+// Helper method to generate unique sequence number
+var (
+	sequenceMutex   sync.Mutex
+	currentSequence uint64 = 0
+)
+
+func generateSequenceNumber() uint64 {
+	sequenceMutex.Lock()
+	defer sequenceMutex.Unlock()
+	currentSequence++
+	return currentSequence
 }

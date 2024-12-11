@@ -35,6 +35,9 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 	}
 	logger.InfoLogger.Printf("Retrieved %d transactions from mempool", len(transactions))
 
+	// Check if the retrived transactions are already in ledger, if yes, skip them by adjusting the blocksize
+	// This is to prevent double spending
+
 	// Step 2: Create a coinbase transaction to reward the miner.
 	coinbaseTx := m.createCoinbaseTransaction(len(m.Blockchain.Ledger))
 
@@ -67,7 +70,13 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 		return nil, err
 	}
 	logger.InfoLogger.Printf("Block successfully added to blockchain with hash: %x. Blockchain length is now: %d", block.Header.BlockHash, len(m.Blockchain.Ledger))
+	// Log the contents of the block in detail with the transactions
+	logger.InfoLogger.Println("Block contents:")
+	logger.InfoLogger.Printf("Block Hash: %x", block.Header.BlockHash)
 
+	for i, tx := range block.Transactions {
+		logger.InfoLogger.Printf("Transaction %d Data: %v", i, tx.Data)
+	}
 	return block, nil
 }
 
