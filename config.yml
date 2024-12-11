@@ -1,5 +1,5 @@
 blockchain_settings:
-  block_size: 4
+  block_size: 2
   target_hash: 0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
   block_confirmation_depth: 2
   mining_reward: 50

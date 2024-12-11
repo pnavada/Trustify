@@ -2,7 +2,6 @@ package network
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
@@ -485,22 +484,26 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 		}
 		n.HandleIncomingTransaction(tx, signature, publicKey)
 	case MessageTypeBlock:
-		if len(message.Data) < 5 { // 1 byte for type + 4 bytes for length
-			logger.ErrorLogger.Println("Received block data too short")
-			return
-		}
+		// if len(message.Data) < 5 { // 1 byte for type + 4 bytes for length
+		// 	logger.ErrorLogger.Println("Received block data too short")
+		// 	return
+		// }
 
 		logger.InfoLogger.Printf("Received block from sender %v with payload %v\n", message.Sender, payload)
 
 		// Read the length of the serialized block
-		length := binary.BigEndian.Uint32(message.Data[1:5])
-		if int(length) > len(message.Data[5:]) {
-			logger.ErrorLogger.Printf("Declared block length %d exceeds received data %d\n", length, len(message.Data[5:]))
+		// length := binary.BigEndian.Uint32(message.Data[1:5])
+		// if int(length) > len(message.Data[5:]) {
+		// logger.ErrorLogger.Printf("Declared block length %d exceeds received data %d\n", length, len(message.Data[5:]))
+		// return
+		// }
+
+		serializedBlock := message.Data[1:]
+		block, err := blockchain.DeserializeBlock(serializedBlock)
+		if err != nil {
+			logger.ErrorLogger.Println("Failed to deserialize block from UDP data:", err)
 			return
 		}
-
-		serializedBlock := message.Data[5 : 5+length]
-		block := blockchain.DeserializeBlock(serializedBlock)
 		if block == nil {
 			logger.ErrorLogger.Println("Failed to deserialize block from UDP data")
 		}
@@ -522,14 +525,16 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 	// Print block data
 	logger.InfoLogger.Printf("Broadcasting block: %+v\n", block)
 
-	// Log the block and block header
-	logger.InfoLogger.Printf("Block: %+v\n", block)
-	logger.InfoLogger.Printf("Block Header: %+v\n", block.Header)
-
-	// Network broadcasting
-	err := SendBlock(block)
-	if err != nil {
-		logger.ErrorLogger.Println("Failed to broadcast block:", err)
+	// Make sure the block and block header are not nil
+	if block != nil && block.Header != nil {
+		// Log the block and block header
+		logger.InfoLogger.Printf("Block: %+v\n", block)
+		logger.InfoLogger.Printf("Block Header: %+v\n", block.Header)
+		// Network broadcasting
+		err := SendBlock(block)
+		if err != nil {
+			logger.ErrorLogger.Println("Failed to broadcast block:", err)
+		}
 	}
 
 }
