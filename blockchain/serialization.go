@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"trustify/logger"
 )
 
 func init() {
@@ -24,11 +25,15 @@ func SerializeTransaction(tx *Transaction) []byte {
 	return buff.Bytes()
 }
 
-func DeserializeTransaction(data []byte) *Transaction {
+func DeserializeTransaction(data []byte) (*Transaction, error) {
 	var tx Transaction
 	dec := gob.NewDecoder(bytes.NewReader(data))
-	dec.Decode(&tx)
-	return &tx
+	err := dec.Decode(&tx)
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to deserialize transaction: %v\n", err)
+		return nil, err
+	}
+	return &tx, nil
 }
 
 func SerializeBlockHeader(b *BlockHeader) []byte {
@@ -41,7 +46,25 @@ func SerializeBlockHeader(b *BlockHeader) []byte {
 func SerializeBlock(b *Block) []byte {
 	var buff bytes.Buffer
 	enc := gob.NewEncoder(&buff)
+
 	enc.Encode(b)
+
+	// serialized := buff.Bytes()
+	// deserialized := DeserializeBlock(serialized)
+
+	// // Compare deserialized and b with deep equality
+	// if !bytes.Equal(SerializeBlockHeader(deserialized.Header), SerializeBlockHeader(b.Header)) {
+	// 	logger.ErrorLogger.Println("Block header serialization failed")
+	// } else {
+	// 	logger.InfoLogger.Println("Block header serialization successful")
+	// }
+
+	// // Also deep print the block and deserialized block
+	// logger.InfoLogger.Println("Block: ", b)
+	// logger.InfoLogger.Println("Deserialized block: ", deserialized)
+	// b.PrintToString()
+	// deserialized.PrintToString()
+
 	return buff.Bytes()
 }
 
