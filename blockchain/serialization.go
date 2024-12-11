@@ -12,10 +12,13 @@ func init() {
 	gob.Register(&PurchaseTransactionData{})
 	gob.Register(&ReviewTransactionData{})
 	gob.Register(&UTXOTransaction{})
+	gob.Register(&UTXOTransaction{})
+	gob.Register(&UTXOTransactionID{})
 	gob.Register(&CoinbaseTransactionData{})
 	gob.Register(&BlockHeader{})
 	gob.Register(&Block{})
 	gob.Register(&Transaction{})
+
 }
 
 func SerializeTransaction(tx *Transaction) []byte {

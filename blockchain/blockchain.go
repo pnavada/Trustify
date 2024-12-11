@@ -55,7 +55,9 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 	}
 
 	lastBlock := bc.LatestBlock()
-	if !bytes.Equal(block.Header.PreviousHash, lastBlock.Header.BlockHash) {
+	lastBlockHash := bc.ComputeHash(lastBlock)
+
+	if !bytes.Equal(block.Header.PreviousHash, lastBlockHash) {
 		err := bc.resolveFork(lastBlock.Header.BlockHash)
 		if err != nil {
 			logger.ErrorLogger.Println("Failed to resolve fork:", err)
@@ -305,7 +307,16 @@ func (bc *Blockchain) ValidateTimestamp(block *Block) bool {
 
 // ComputeHash calculates the hash of the block's header.
 func (bc *Blockchain) ComputeHash(block *Block) []byte {
+	// log the block contents
+	logger.InfoLogger.Printf("Block: %v\n", block)
+	// log the block header
+	logger.InfoLogger.Printf("Block Header: %v\n", block.Header)
+
+	if bytes.Equal(block.Header.BlockHash, bc.Ledger[0].Header.BlockHash) {
+		return block.Header.BlockHash
+	}
 	return HashObject(SerializeBlockHeader(block.Header))
+
 }
 
 // CommitBlock commits blocks that have reached the confirmation depth.
@@ -316,17 +327,34 @@ func (bc *Blockchain) CommitBlock() {
 		return
 	}
 
-	blockToCommitIndex := numBlocks - bc.ConfirmationDepth - 1
+	blockToCommitIndex := numBlocks - bc.ConfirmationDepth
 	blockToCommit := bc.Ledger[blockToCommitIndex]
+
+	// Create a list of UTXOTransaction
+	var tempTransactions []*UTXOTransaction
 
 	for _, tx := range blockToCommit.Transactions {
 		// Remove UTXOs used in the transaction inputs
 		for _, input := range tx.Inputs {
-			if _, hasUTXO := bc.UTXOSet.Get(input.ID); hasUTXO {
+			if utxo, hasUTXO := bc.UTXOSet.Get(input.ID); hasUTXO {
+				tempTransactions = append(tempTransactions, utxo)
 				bc.UTXOSet.Remove(input.ID)
 			} else {
-				logger.ErrorLogger.Printf("UTXO not found for input ID: %v\n", input.ID)
-				continue
+				// Clear the ledger from this block onwards and add the transactions to the mempool
+				for i := blockToCommitIndex; i < len(bc.Ledger); i++ {
+					for _, tx := range bc.Ledger[i].Transactions {
+						// neglect coinbase transactions
+						if _, ok := tx.Data.(CoinbaseTransactionData); !ok {
+							bc.Mempool.AddTransaction(tx)
+						}
+					}
+				}
+				bc.Ledger = bc.Ledger[:blockToCommitIndex]
+
+				// Add all tempTransactions to utxoSet
+				for _, tx := range tempTransactions {
+					bc.UTXOSet.Add(tx)
+				}
 			}
 		}
 
