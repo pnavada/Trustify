@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
-	"trustify/logger"
 )
 
 func init() {
@@ -44,7 +43,6 @@ func DeserializeBlock(data []byte) *Block {
 
 func HashObject(serializedData []byte) []byte {
 	hash := sha256.Sum256(serializedData)
-	logger.InfoLogger.Println("Computed hash:", hash[:])
 	return hash[:]
 }
 
