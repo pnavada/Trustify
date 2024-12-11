@@ -459,6 +459,10 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 		if block == nil {
 			logger.ErrorLogger.Println("Failed to deserialize block from UDP data")
 		}
+
+		// Log the contents of block
+		block.PrintToString()
+
 		n.HandleIncomingBlock(block)
 	default:
 		logger.ErrorLogger.Printf("Unknown message type %v , msg: %v from %v\n", messageType, string(message.Data), message.Sender)

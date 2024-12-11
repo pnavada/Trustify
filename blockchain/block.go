@@ -46,12 +46,16 @@ func NewBlock(transactions []*Transaction, previousHash []byte, targetHash []byt
 	}
 
 	// Create the block header
+	if merkleRoot == nil {
+		return nil, ErrInvalidMerkleRoot
+	}
 	header := BlockHeader{
 		PreviousHash: previousHash,
 		MerkleRoot:   merkleRoot.GetRoot(),
-		Timestamp:    time.Now().Unix(),
+		Timestamp:    time.Now().UnixNano(), // Using nanosecond precision
 		TargetHash:   targetHash,
-		Nonce:        0, // Initial nonce (to be updated during mining)
+		Nonce:        0,        // Initial nonce (to be updated during mining)
+		BlockHash:    []byte{}, // Placeholder for the block hash
 	}
 
 	// Create the block
@@ -82,4 +86,21 @@ func (b *Block) GetTransactionFee() int64 {
 		totalFees += int64(transaction.GetTransactionFee())
 	}
 	return totalFees
+}
+
+// Print the complete contents of the block - similar to JAVA's toString() method in smart and consise way and also write all the transactions of the block
+func (b *Block) PrintToString() {
+	// Print returns a string representation of the block
+	logger.InfoLogger.Printf("Block Hash: %x", b.Header.BlockHash)
+	logger.InfoLogger.Printf("Previous Hash: %x", b.Header.PreviousHash)
+	logger.InfoLogger.Printf("Merkle Root: %x", b.Header.MerkleRoot)
+	logger.InfoLogger.Printf("Timestamp: %v", time.Unix(0, b.Header.Timestamp))
+	logger.InfoLogger.Printf("Target Hash: %x", b.Header.TargetHash)
+	logger.InfoLogger.Printf("Nonce: %d", b.Header.Nonce)
+	logger.InfoLogger.Printf("Transaction Count: %d", b.TransactionCount)
+
+	for i, tx := range b.Transactions {
+		logger.InfoLogger.Printf("Transaction %d:", i+1)
+		logger.InfoLogger.Printf("  Sender: %s", tx.Data)
+	}
 }

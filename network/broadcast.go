@@ -188,9 +188,9 @@ func deserializeTransactionMessage(data []byte) (*blockchain.Transaction, []byte
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to read transaction data: %v", err)
 	}
-	tx := blockchain.DeserializeTransaction(txData)
-	if tx == nil {
-		return nil, nil, nil, fmt.Errorf("failed to deserialize transaction")
+	tx, err := blockchain.DeserializeTransaction(txData)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to deserialize transaction: %v", err)
 	}
 
 	// Read Signature Data
@@ -228,6 +228,9 @@ func SendBlock(block *blockchain.Block) error {
 	// Write the serialized block
 	buf.Write(serializedBlock)
 
+	// Log serializedBlock
+	logger.InfoLogger.Printf("Serialized block: %v\n", serializedBlock)
+
 	// Broadcast the message
 	return BroadcastMessage(buf.Bytes())
 }
@@ -243,16 +246,24 @@ func writeVarBytes(w *bytes.Buffer, data []byte) error {
 	return err
 }
 
+// Define a maximum allowed length (e.g., 10MB)
+const MaxVarBytesLength = 10 * 1024 * 1024 // 10 MB
+
 func readVarBytes(r *bytes.Reader) ([]byte, error) {
 	var length uint64
 	err := binary.Read(r, binary.BigEndian, &length)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read length: %v", err)
 	}
+
+	if length > MaxVarBytesLength {
+		return nil, fmt.Errorf("readVarBytes: length %d exceeds maximum allowed %d", length, MaxVarBytesLength)
+	}
+
 	data := make([]byte, length)
 	n, err := r.Read(data)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read data: %v", err)
 	}
 	if uint64(n) != length {
 		return nil, fmt.Errorf("expected %d bytes, read %d bytes", length, n)
