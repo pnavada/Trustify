@@ -35,6 +35,7 @@ type Node struct {
 	hostName     string
 	ownIPs       map[string]bool
 	ipMutex      sync.RWMutex
+	walletMutex  sync.RWMutex // Dedicated mutex for wallet operations
 }
 
 // Context - blockchain package files
@@ -198,6 +199,44 @@ func (n *Node) collectOwnIPs() {
 	logger.InfoLogger.Printf("Collected own IP addresses: %v\n", n.ownIPs)
 }
 
+func (n *Node) SyncWallet() {
+	// Periodically sync the wallet with the UTXO set
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			n.syncWalletWithUTXOSet()
+		}
+	}()
+}
+
+func (n *Node) syncWalletWithUTXOSet() {
+	// Lock the wallet for writing
+	n.walletMutex.Lock()
+	defer n.walletMutex.Unlock()
+
+	// Temporary map to store updated UTXOs
+	updatedUTXOsMap := make(map[string]*blockchain.UTXOTransaction)
+
+	// Iterate over all UTXOs in the UTXOSet
+	for _, utxo := range n.UTXOSet.UTXOs {
+		if bytes.Equal(utxo.Address, n.Wallet.BitcoinAddress) {
+			updatedUTXOsMap[utxo.ID.String()] = utxo
+		}
+	}
+
+	// Reconstruct the wallet's UTXOs from the map
+	var updatedUTXOs []*blockchain.UTXOTransaction
+	for _, utxo := range updatedUTXOsMap {
+		updatedUTXOs = append(updatedUTXOs, utxo)
+	}
+
+	// Update the wallet's UTXOs atomically
+	n.Wallet.UTXOs = updatedUTXOs
+
+	logger.InfoLogger.Printf("Wallet synchronized. Total UTXOs: %d\n", len(n.Wallet.UTXOs))
+}
+
 // HandleGetBlocksRequest handles incoming GetBlocks requests from peers
 func (n *Node) HandleGetBlocksRequest(s network.Stream) {
 	defer s.Close()
@@ -236,6 +275,10 @@ func (n *Node) StartMining() {
 				continue
 			}
 			if block != nil && block.Header != nil {
+				// log the block and block header
+				logger.InfoLogger.Printf("SEE HERE Block: %+v\n", block)
+				logger.InfoLogger.Printf("SEE HERE Block Header: %+v\n", block.Header)
+
 				n.BroadcastBlock(block)
 			} else {
 				// Log block and block header
@@ -272,6 +315,8 @@ func (n *Node) Start() {
 	for _, tx := range n.Config.Nodes[n.hostName].Transactions {
 		go n.handleConfigTransaction(tx)
 	}
+
+	go n.SyncWallet()
 
 	n.HandleMessages()
 }
@@ -461,7 +506,7 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 		}
 
 		// Log the contents of block
-		block.PrintToString()
+		// block.PrintToString()
 
 		n.HandleIncomingBlock(block)
 	default:

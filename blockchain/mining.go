@@ -44,7 +44,7 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 	transactions = append([]*Transaction{coinbaseTx}, transactions...)
 
 	// Step 4: Create a new block.
-	previousHash := m.Blockchain.LatestBlock().Header.BlockHash
+	previousHash := m.Blockchain.ComputeHash(m.Blockchain.LatestBlock())
 	targetHash := m.Blockchain.LatestBlock().Header.TargetHash
 	block, err := NewBlock(transactions, previousHash, targetHash)
 	if err != nil {
@@ -125,14 +125,20 @@ func (m *Miner) processTransactionRewards(transactions []*Transaction, coinbaseT
 		case *PurchaseTransactionData:
 			logger.InfoLogger.Printf("Adding transaction fee for purchase transaction: %x", tx.ID)
 			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
+				ID: &UTXOTransactionID{
+					TxHash:  coinbaseTx.Outputs[0].ID.TxHash,
+					TxIndex: coinbaseTx.Outputs[len(coinbaseTx.Outputs)-1].ID.TxIndex + 1,
+				},
 				Address: m.Wallet.BitcoinAddress,
 				Amount:  tx.GetTransactionFee(),
 			})
 		case *ReviewTransactionData:
 			logger.InfoLogger.Printf("Adding review reward for transaction: %x", tx.ID)
 			coinbaseTx.Outputs = append(coinbaseTx.Outputs, &UTXOTransaction{
-				ID:      coinbaseTx.Outputs[0].ID,
+				ID: &UTXOTransactionID{
+					TxHash:  coinbaseTx.Outputs[0].ID.TxHash,
+					TxIndex: coinbaseTx.Outputs[len(coinbaseTx.Outputs)-1].ID.TxIndex + 1,
+				},
 				Address: data.ReviewerAddress,
 				Amount:  m.Blockchain.ReviewReward,
 			})

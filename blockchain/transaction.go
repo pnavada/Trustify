@@ -84,6 +84,15 @@ func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID
 	Serialized := SerializeTransaction(tx)
 	hashed := HashObject(Serialized)
 	tx.ID = hashed
+
+	// Assign the IDS for the outputs
+	for i, output := range tx.Outputs {
+		output.ID = &UTXOTransactionID{
+			TxHash:  tx.ID,
+			TxIndex: i,
+		}
+	}
+
 	logger.InfoLogger.Println("New purchase transaction created:", tx.ID, " with data:", txData)
 	return tx
 }

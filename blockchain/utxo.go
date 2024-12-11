@@ -55,7 +55,7 @@ func (u *UTXOSet) Add(utxo *UTXOTransaction) bool {
 	defer u.Mutex.Unlock()
 	key := utxo.ID.String()
 	if _, exists := u.UTXOs[key]; exists {
-		logger.ErrorLogger.Println("UTXO already exists:", key)
+		logger.InfoLogger.Println("UTXO already exists:", key)
 		return false
 	}
 	u.UTXOs[key] = utxo
@@ -85,7 +85,7 @@ func (u *UTXOSet) Get(id *UTXOTransactionID) (*UTXOTransaction, bool) {
 	key := id.String()
 	utxo, exists := u.UTXOs[key]
 	if !exists {
-		logger.ErrorLogger.Println("UTXO not found:", key)
+		logger.InfoLogger.Println("UTXO not found:", key)
 		return nil, false
 	}
 	return utxo, true
