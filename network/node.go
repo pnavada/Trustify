@@ -2,7 +2,7 @@ package network
 
 import (
 	"bytes"
-	"encoding/hex"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
@@ -152,8 +152,16 @@ func (n *Node) StartMining() {
 		blockSize := n.Config.BlockchainSettings.BlockSize
 		// logger.InfoLogger.Println("Number of transaction in mempool:", n.Mempool.Transactions.Len())
 		if n.Mempool.Transactions.Len() >= blockSize {
-			block, _ := n.Miner.MineBlock(blockSize)
-			n.BroadcastBlock(block)
+			block, err := n.Miner.MineBlock(blockSize)
+			if err != nil {
+				logger.ErrorLogger.Println("Failed to mine block:", err)
+				continue
+			}
+			if block != nil {
+				n.BroadcastBlock(block)
+			} else {
+				logger.ErrorLogger.Println("Block is nil")
+			}
 		}
 	}
 }
@@ -321,7 +329,8 @@ func (n *Node) HandleMessages() {
 }
 
 func (n *Node) handleIncomingMessage(message InboundMessage) {
-	if len(message.Data) == 0 {
+	if len(message.Data) < 5 { // 1 byte for type + 4 bytes for length
+		logger.ErrorLogger.Println("Received block data too short")
 		return
 	}
 
@@ -338,12 +347,19 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 		}
 		n.HandleIncomingTransaction(tx, signature, publicKey)
 	case MessageTypeBlock:
-		logger.InfoLogger.Printf("Received block from %s\n", message.Sender)
-		block := blockchain.DeserializeBlock(payload)
-		logger.InfoLogger.Printf("Received block: %v\n", block)
-		if block == nil {
-			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n", message.Sender)
+		logger.InfoLogger.Printf("Received block from sender %v with payload %v\n", message.Sender, payload)
+
+		// Read the length of the serialized block
+		length := binary.BigEndian.Uint32(message.Data[1:5])
+		if int(length) > len(message.Data[5:]) {
+			logger.ErrorLogger.Printf("Declared block length %d exceeds received data %d\n", length, len(message.Data[5:]))
 			return
+		}
+
+		serializedBlock := message.Data[5 : 5+length]
+		block := blockchain.DeserializeBlock(serializedBlock)
+		if block == nil {
+			logger.ErrorLogger.Println("Failed to deserialize block from UDP data")
 		}
 		n.HandleIncomingBlock(block)
 	default:
@@ -358,7 +374,10 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 
 	// Print block data
 	logger.InfoLogger.Printf("Broadcasting block: %+v\n", block)
-	logger.InfoLogger.Printf("Block's merkle root: %v\n", hex.EncodeToString(block.Header.MerkleRoot))
+
+	// Log the block and block header
+	logger.InfoLogger.Printf("Block: %+v\n", block)
+	logger.InfoLogger.Printf("Block Header: %+v\n", block.Header)
 
 	// Network broadcasting
 	err := SendBlock(block)
