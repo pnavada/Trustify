@@ -329,6 +329,12 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 	switch messageType {
 	case MessageTypeTransaction:
 		logger.InfoLogger.Printf("Received transaction from %s\n", message.Sender)
+		hostname, err := net.LookupAddr(message.Sender.String())
+		if err != nil {
+			logger.ErrorLogger.Printf("Failed to lookup hostname for %s: %v\n", message.Sender, err)
+		} else {
+			logger.InfoLogger.Printf("Transaction received from hostname: %s\n", hostname[0])
+		}
 		tx, signature, publicKey, err := deserializeTransactionMessage(payload)
 		if err != nil {
 			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n", message.Sender)
@@ -388,7 +394,14 @@ func (n *Node) BroadcastTransaction(tx *blockchain.Transaction) {
 	}
 
 	// Print tx, signature and public key
-	logger.InfoLogger.Printf("Transaction: %+v, Signature : %+v and Public Key: %+v are ready for braodcasting\n", tx, signature, publicKey)
+	logger.InfoLogger.Printf("Transaction: %+v, Signature : %+v and Public Key: %+v are ready for broadcasting\n", tx.Data, signature, publicKey)
+
+	// Parse into purchase transaction and log the contents
+	if purchaseTx, ok := tx.Data.(*blockchain.PurchaseTransactionData); ok {
+		logger.InfoLogger.Printf("Purchase Transaction Details: Seller Address: %x, Amount: %d, ProductID: %s\n", purchaseTx.SellerAddress, purchaseTx.Amount, purchaseTx.ProductID)
+	} else {
+		logger.InfoLogger.Println("Transaction is not a purchase transaction")
+	}
 
 	// Network broadcasting
 	err = SendTransaction(tx, signature, publicKey)

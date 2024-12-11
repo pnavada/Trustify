@@ -129,87 +129,87 @@ nodes:
         AwEHoUQDQgAEqYTZyzdpZBjMFb48RXvpjtFBD+MZbfIzO6U+P2cE4ClrsIDI7yft
         N/XpQfhEfFnoMA9WD+Xw5egwGikpnGTeXQ==
         -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 7
-    #     buyer_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
-    #     seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
-    #     product_id: product6
-    #     fee: 2
-  node6:
-    wallet:
-      private_key: |
-        -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIF5ufSze9c9focVh8Gtr7/BEeF9F/YW0P1cjWJSIqR+NoAoGCCqGSM49
-        AwEHoUQDQgAE+AJWCFeoOdn+uhVp3aw3w8Dw+SGZcLpRrBg/fK/6KX646m4fsSPQ
-        ix0tJLswDIKUXgWLrgFXgaDfHohBZztHfA==
-        -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 12
-    #     buyer_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
-    #     seller_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
-    #     product_id: product7
-    #     fee: 3
-  node7:
-    wallet:
-      private_key: |
-        -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIIU6xUUXcNiRo0fVFYL90r+Wact+1OB6wXNq6TZxwqlUoAoGCCqGSM49
-        AwEHoUQDQgAEfyRCQjZ1gg8NsKkatszHxuOIcHwXsHQJWh4T7hzHy0Fkv/f2fiiA
-        5YHh4NWfJSofQ9YOSvSBmMssn32pGaEUcg==
-        -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: review
-    #     delay: 15
-    #     reviewer_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
-    #     product_id: product8
-    #     rating: 4
-  node8:
-    wallet:
-      private_key: |
-        -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIH08x+hKMRXlXvwnpySn9aR+2UFxhxM3Zirvidlt9mSUoAoGCCqGSM49
-        AwEHoUQDQgAEFTxPcYSNfV8aZTlDCP5BHPmXd2+RoEgsxV9ug+Dgf3K2u78PBvKo
-        Wz1iqVlhK0sv1pkyhNxFb244cDp3hEaaNw==
-        -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 14
-    #     buyer_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
-    #     seller_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
-    #     product_id: product9
-    #     fee: 2
-  node9:
-    wallet:
-      private_key: |
-        -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIK1+ATyTKcO5wAZNPQHuBFuzRiyfvr5K+rID8Pi+Cft2oAoGCCqGSM49
-        AwEHoUQDQgAECEh7yPk8efXhVYl1gXU1Msq0cT32nn6RKKGxuDcTk/Zj1BZK9nuo
-        9uWvtYV3cJi4dRV8lQIt+WvggRcGCK//Qg==
-        -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: review
-    #     delay: 18
-    #     reviewer_address: 00525dca97c52b3c158a88ed60db2512c6ddbbc4371f37463d
-    #     product_id: product10
-    #     rating: 5
-  node10:
-    wallet:
-      private_key: |
-        -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIFaNWaTqSR3AFs1hNzOFYrAuPjP9zgMbbztjSpLX8eunoAoGCCqGSM49
-        AwEHoUQDQgAE4/aSCAR8GoZ05S5hIINhvPhs+AMAN/edhmjMhfnprKU1MgbNNyD/
-        ArXHy1+sVpHeYIl+lH16ivQAAnmuoamgqA==
-        -----END EC PRIVATE KEY-----
-    # transactions:
-    #   - type: purchase
-    #     amount: 5
-    #     delay: 19
-    #     buyer_address: 00435c47b5bac025121573cdaee69784c2e35bbe3cf9a7766a
-    #     seller_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
-    #     product_id: product11
-    #     fee: 3
+    transactions:
+      - type: purchase
+        amount: 5
+        delay: 7
+        buyer_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
+        seller_address: 002de2222fead2c95275ac0f8ecec6a9e99aeaa5da748aa3f4
+        product_id: product6
+        fee: 2
+  # node6:
+  #   wallet:
+  #     private_key: |
+  #       -----BEGIN EC PRIVATE KEY-----
+  #       MHcCAQEEIF5ufSze9c9focVh8Gtr7/BEeF9F/YW0P1cjWJSIqR+NoAoGCCqGSM49
+  #       AwEHoUQDQgAE+AJWCFeoOdn+uhVp3aw3w8Dw+SGZcLpRrBg/fK/6KX646m4fsSPQ
+  #       ix0tJLswDIKUXgWLrgFXgaDfHohBZztHfA==
+  #       -----END EC PRIVATE KEY-----
+  #   # transactions:
+  #   #   - type: purchase
+  #   #     amount: 5
+  #   #     delay: 12
+  #   #     buyer_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
+  #   #     seller_address: 00720c9f1e6d29a4d003b326ccbbde1574cd9ada47bbca6a04
+  #   #     product_id: product7
+  #   #     fee: 3
+  # node7:
+  #   wallet:
+  #     private_key: |
+  #       -----BEGIN EC PRIVATE KEY-----
+  #       MHcCAQEEIIU6xUUXcNiRo0fVFYL90r+Wact+1OB6wXNq6TZxwqlUoAoGCCqGSM49
+  #       AwEHoUQDQgAEfyRCQjZ1gg8NsKkatszHxuOIcHwXsHQJWh4T7hzHy0Fkv/f2fiiA
+  #       5YHh4NWfJSofQ9YOSvSBmMssn32pGaEUcg==
+  #       -----END EC PRIVATE KEY-----
+  #   # transactions:
+  #   #   - type: review
+  #   #     delay: 15
+  #   #     reviewer_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
+  #   #     product_id: product8
+  #   #     rating: 4
+  # node8:
+  #   wallet:
+  #     private_key: |
+  #       -----BEGIN EC PRIVATE KEY-----
+  #       MHcCAQEEIH08x+hKMRXlXvwnpySn9aR+2UFxhxM3Zirvidlt9mSUoAoGCCqGSM49
+  #       AwEHoUQDQgAEFTxPcYSNfV8aZTlDCP5BHPmXd2+RoEgsxV9ug+Dgf3K2u78PBvKo
+  #       Wz1iqVlhK0sv1pkyhNxFb244cDp3hEaaNw==
+  #       -----END EC PRIVATE KEY-----
+  #   # transactions:
+  #   #   - type: purchase
+  #   #     amount: 5
+  #   #     delay: 14
+  #   #     buyer_address: 1P3xyXZAfXL29PB4mn8Z9XZ12XYZMn9A3
+  #   #     seller_address: 0052bfe71e6ca6e9ba167a45b54536a6e4b07f2c0acd5a80fa
+  #   #     product_id: product9
+  #   #     fee: 2
+  # node9:
+  #   wallet:
+  #     private_key: |
+  #       -----BEGIN EC PRIVATE KEY-----
+  #       MHcCAQEEIK1+ATyTKcO5wAZNPQHuBFuzRiyfvr5K+rID8Pi+Cft2oAoGCCqGSM49
+  #       AwEHoUQDQgAECEh7yPk8efXhVYl1gXU1Msq0cT32nn6RKKGxuDcTk/Zj1BZK9nuo
+  #       9uWvtYV3cJi4dRV8lQIt+WvggRcGCK//Qg==
+  #       -----END EC PRIVATE KEY-----
+  #   # transactions:
+  #   #   - type: review
+  #   #     delay: 18
+  #   #     reviewer_address: 00525dca97c52b3c158a88ed60db2512c6ddbbc4371f37463d
+  #   #     product_id: product10
+  #   #     rating: 5
+  # node10:
+  #   wallet:
+  #     private_key: |
+  #       -----BEGIN EC PRIVATE KEY-----
+  #       MHcCAQEEIFaNWaTqSR3AFs1hNzOFYrAuPjP9zgMbbztjSpLX8eunoAoGCCqGSM49
+  #       AwEHoUQDQgAE4/aSCAR8GoZ05S5hIINhvPhs+AMAN/edhmjMhfnprKU1MgbNNyD/
+  #       ArXHy1+sVpHeYIl+lH16ivQAAnmuoamgqA==
+  #       -----END EC PRIVATE KEY-----
+  #   # transactions:
+  #   #   - type: purchase
+  #   #     amount: 5
+  #   #     delay: 19
+  #   #     buyer_address: 00435c47b5bac025121573cdaee69784c2e35bbe3cf9a7766a
+  #   #     seller_address: 00d327e067346c6f4aaa942bf6ef99a6616d29d392aaa9de95
+  #   #     product_id: product11
+  #   #     fee: 3

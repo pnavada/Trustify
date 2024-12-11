@@ -8,13 +8,10 @@ type Transaction struct {
 	ID      []byte
 	Inputs  []*UTXOTransaction
 	Outputs []*UTXOTransaction
-	Data    TransactionData
+	Data    interface{}
 }
 
-type TransactionData interface{}
-
 type PurchaseTransactionData struct {
-	TransactionData
 	BuyerAddress  []byte
 	SellerAddress []byte
 	ProductID     string
@@ -22,7 +19,6 @@ type PurchaseTransactionData struct {
 }
 
 type ReviewTransactionData struct {
-	TransactionData
 	ReviewerAddress []byte
 	Rating          int
 	ProductID       string
@@ -82,7 +78,7 @@ func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID
 	Serialized := SerializeTransaction(tx)
 	hashed := HashObject(Serialized)
 	tx.ID = hashed
-	logger.InfoLogger.Println("New purchase transaction created:", tx.ID)
+	logger.InfoLogger.Println("New purchase transaction created:", tx.ID, " with data:", txData)
 	return tx
 }
 

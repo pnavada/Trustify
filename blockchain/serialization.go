@@ -9,9 +9,9 @@ import (
 
 func init() {
 	// Register all concrete types used in interfaces
-	gob.Register(PurchaseTransactionData{})
-	gob.Register(ReviewTransactionData{})
-	gob.Register(UTXOTransaction{})
+	gob.Register(&PurchaseTransactionData{})
+	gob.Register(&ReviewTransactionData{})
+	gob.Register(&UTXOTransaction{})
 }
 
 func SerializeTransaction(tx *Transaction) []byte {
