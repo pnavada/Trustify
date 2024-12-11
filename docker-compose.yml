@@ -21,12 +21,12 @@ services:
     networks:
       - network1
   
-  node4:
-    image: trustify
-    hostname: "node4"
-    container_name: "node4"
-    networks:
-      - network1
+  # node4:
+  #   image: trustify
+  #   hostname: "node4"
+  #   container_name: "node4"
+  #   networks:
+  #     - network1
 
 #   # Nodes in Network 2
 #   node7:
@@ -58,14 +58,14 @@ services:
 #       - network2
 
   # Bridge Nodes
-  node5:
-    image: trustify
-    hostname: "node5"
-    container_name: "node5"
-    privileged: true
-    networks:
-      - network1
-      - network2
+  # node5:
+  #   image: trustify
+  #   hostname: "node5"
+  #   container_name: "node5"
+  #   privileged: true
+  #   networks:
+  #     - network1
+  #     - network2
 
 #   node6:
 #     image: trustify
