@@ -85,13 +85,18 @@ func (p *GetBlocksProtocol) sendGetBlocksRequests(peerList []peer.ID, lastKnownH
 	ctx, cancel := context.WithTimeout(context.Background(), p.Timeout)
 	defer cancel()
 
-	for {
+	for response := range p.BlocksChannel {
 		select {
 		case <-ctx.Done():
 			logger.InfoLogger.Println("Timeout reached while waiting for peer responses")
 			return nil
+		default:
+			// Process the response
+			logger.InfoLogger.Printf("Received blocks from peer: %v", response)
 		}
 	}
+
+	return nil
 }
 
 // requestBlocks sends a request to a single peer and returns its response

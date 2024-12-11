@@ -78,7 +78,7 @@ func (bc *Blockchain) resolveFork(startHash []byte) error {
 		}
 
 		// Wait for responses from BlocksChannel
-		responses := bc.waitForResponses()
+		responses := bc.getResponses()
 		if responses == nil {
 			logger.ErrorLogger.Println("No responses received from peers")
 			return errors.New("no responses received from peers")
@@ -108,15 +108,35 @@ func (bc *Blockchain) resolveFork(startHash []byte) error {
 			return errors.New("no valid chain found")
 		}
 
-		// Add unmatched blocks' transactions to the mempool
-		bc.addUnmatchedBlocksToMempool(startHash)
+		// Find the index of the first node of the best chain in the ledger
+		firstNodeIndex, err := bc.GetBlockIndexByHash(bestChain[0].Header.BlockHash)
+		if err != nil {
+			logger.ErrorLogger.Println("Failed to get block index by hash:", err)
+		}
 
-		// Add the best chain to the ledger
-		bc.addBestChainToLedger(bestChain)
+		if firstNodeIndex != -1 && firstNodeIndex+len(bestChain) > len(bc.Ledger) {
+			// Add unmatched blocks' transactions to the mempool
+			bc.addUnmatchedBlocksToMempool(startHash)
+
+			// Add the best chain to the ledger
+			bc.addBestChainToLedger(bestChain[firstNodeIndex:])
+		}
 
 		logger.InfoLogger.Println("Best chain added to ledger")
 		return nil
 	}
+}
+
+// GetBlockIndexByHash retrieves the index of a block in the ledger by its hash.
+func (bc *Blockchain) GetBlockIndexByHash(hash []byte) (int, error) {
+	for i, block := range bc.Ledger {
+		if bytes.Equal(block.Header.BlockHash, hash) {
+			logger.InfoLogger.Printf("Block index found for hash: %x\n", hash)
+			return i, nil
+		}
+	}
+	logger.ErrorLogger.Printf("Block index not found for hash: %x\n", hash)
+	return -1, ErrBlockNotFound
 }
 
 // validateChains validates all blocks in each chain.
@@ -137,9 +157,13 @@ func (bc *Blockchain) validateChains(chains [][]*Block) error {
 }
 
 func (bc *Blockchain) isValidChain(chain []*Block) bool {
-	for _, blk := range chain {
+	for i, blk := range chain {
 		if err := bc.ValidateBlock(blk); err != nil {
 			logger.ErrorLogger.Println("Block validation failed in chain:", err)
+			return false
+		}
+		if i > 0 && !bytes.Equal(blk.Header.PreviousHash, chain[i-1].Header.BlockHash) {
+			logger.ErrorLogger.Println("Previous hash does not match in chain")
 			return false
 		}
 	}
@@ -156,18 +180,18 @@ func (bc *Blockchain) addUnmatchedBlocksToMempool(startHash []byte) {
 
 	for i := len(bc.Ledger) - 1; i >= 0; i-- {
 		if bytes.Equal(bc.Ledger[i].Header.BlockHash, startHash) {
-			bc.Ledger = bc.Ledger[:i+1]
+			bc.Ledger = bc.Ledger[:i]
 			break
 		}
 		for _, tx := range bc.Ledger[i].Transactions {
-			bc.Mempool.RemoveTransaction(tx)
+			bc.Mempool.AddTransaction(tx)
 		}
 	}
 
 }
 
-// waitForResponses waits for responses from peers.
-func (bc *Blockchain) waitForResponses() []*GetBlocksResponse {
+// getResponses collects responses from the BlocksChannel.
+func (bc *Blockchain) getResponses() []*GetBlocksResponse {
 	var responses []*GetBlocksResponse
 	for {
 		select {
@@ -195,6 +219,9 @@ func (bc *Blockchain) chooseBestChain(chains [][]*Block) []*Block {
 		}
 		for _, block := range chains[j] {
 			feeJ += block.GetTransactionFee()
+		}
+		if feeI == feeJ {
+			return chains[i][len(chains[i])-1].Header.Timestamp < chains[j][len(chains[j])-1].Header.Timestamp
 		}
 		return feeI > feeJ
 	})
