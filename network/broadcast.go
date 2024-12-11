@@ -216,7 +216,7 @@ func deserializeTransactionMessage(data []byte) (*blockchain.Transaction, []byte
 
 // SendBlock serializes and broadcasts a block.
 func SendBlock(block *blockchain.Block) error {
-	blockData := blockchain.SerializeBlock(block)
+	blockData := blockchain.SerializeBlock(&block.Header)
 	if blockData == nil {
 		return fmt.Errorf("failed to serialize block")
 	}

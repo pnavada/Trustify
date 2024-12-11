@@ -233,6 +233,7 @@ func (bc *Blockchain) ValidateBlock(block *Block) error {
 // ValidateProofOfWork checks if the block's hash meets the target difficulty.
 func (bc *Blockchain) ValidateProofOfWork(block *Block, target []byte) bool {
 	hash := bc.ComputeHash(block)
+	logger.InfoLogger.Printf("Block's nonce: %d\n", block.Header.Nonce)
 	isValid := bytes.Compare(hash, target) < 0
 	if !isValid {
 		logger.InfoLogger.Printf("Proof of work failed for block %x\n", block.Header.BlockHash)
@@ -360,6 +361,10 @@ func (bc *Blockchain) ValidateTransaction(tx *Transaction, utxoSet *UTXOSet) err
 		return bc.validatePurchaseTransaction(tx, &data, utxoSet)
 	case ReviewTransactionData:
 		return bc.validateReviewTransaction(&data)
+	case CoinbaseTransactionData:
+		return nil
+	case *CoinbaseTransactionData:
+		return nil
 	default:
 		logger.ErrorLogger.Println("Invalid transaction type detected")
 		return ErrInvalidTransactionType

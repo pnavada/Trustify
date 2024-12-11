@@ -11,6 +11,7 @@ func init() {
 	gob.Register(&PurchaseTransactionData{})
 	gob.Register(&ReviewTransactionData{})
 	gob.Register(&UTXOTransaction{})
+	gob.Register(&BlockHeader{})
 }
 
 func SerializeTransaction(tx *Transaction) []byte {
@@ -27,7 +28,7 @@ func DeserializeTransaction(data []byte) *Transaction {
 	return &tx
 }
 
-func SerializeBlock(b *Block) []byte {
+func SerializeBlock(b *BlockHeader) []byte {
 	var buff bytes.Buffer
 	enc := gob.NewEncoder(&buff)
 	enc.Encode(b)

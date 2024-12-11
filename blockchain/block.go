@@ -71,8 +71,8 @@ func NewBlock(transactions []*Transaction, previousHash []byte, targetHash []byt
 
 // computeBlockHash calculates the hash of a block using its header and transaction data.
 func computeBlockHash(block *Block) []byte {
-	serializedBlock := SerializeBlock(block) // Serialize block data
-	return HashObject(serializedBlock)       // Compute the hash
+	serializedBlock := SerializeBlock(&block.Header) // Serialize block data
+	return HashObject(serializedBlock)               // Compute the hash
 }
 
 // GetTransactionFee calculates the total transaction fees in a block.

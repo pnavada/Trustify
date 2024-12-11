@@ -366,7 +366,7 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 	// Network broadcasting
 	err := SendBlock(block)
 	if err != nil {
-		logger.ErrorLogger.Println("Failed to broadcast transaction:", err)
+		logger.ErrorLogger.Println("Failed to broadcast block:", err)
 	}
 
 }

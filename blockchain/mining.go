@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"trustify/logger"
 )
@@ -53,6 +54,8 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 	}
 	logger.InfoLogger.Println("New block created successfully")
 
+	logger.InfoLogger.Printf("Target hash for new block: %s", hex.EncodeToString(targetHash))
+
 	// Step 5: Perform Proof of Work.
 	m.performProofOfWork(block)
 
@@ -74,9 +77,10 @@ func (m *Miner) performProofOfWork(block *Block) {
 
 	for {
 		block.Header.Nonce = nonce
-		hash = HashObject(Serialize(block))
+		hash = HashObject(SerializeBlock(&block.Header))
+		logger.InfoLogger.Printf("Current nonce: %d, Hash: %x", nonce, hash)
 		if bytes.Compare(hash, block.Header.TargetHash) < 0 {
-			block.Header.BlockHash = hash
+			// block.Header.BlockHash = hash
 			logger.InfoLogger.Printf("Proof of work completed. Nonce: %d, Hash: %x", nonce, hash)
 			break
 		}
