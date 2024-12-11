@@ -20,8 +20,11 @@ func main() {
 
 	// // Proceed with initializing the node using cfg
 	node := network.NewNode(cfg)
-	
+
 	node.Start()
+	// hash := "0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+	// enc, _ := hex.DecodeString(hash)
+	// print(hex.EncodeToString(enc))
 
 	// // Step 4: Set up graceful shutdown handling.
 	// stop := make(chan os.Signal, 1)

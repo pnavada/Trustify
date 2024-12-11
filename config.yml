@@ -1,5 +1,5 @@
 blockchain_settings:
-  block_size: 2
+  block_size: 4
   target_hash: 0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
   block_confirmation_depth: 3
   mining_reward: 50
@@ -75,20 +75,20 @@ nodes:
         seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
         product_id: product2
         fee: 10
-      - type: purchase
-        amount: 5
-        delay: 15
-        buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
-        seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        product_id: product3
-        fee: 10
-      - type: purchase
-        amount: 10
-        delay: 25
-        buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
-        seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        product_id: product4
-        fee: 10
+      # - type: purchase
+      #   amount: 5
+      #   delay: 15
+      #   buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
+      #   seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
+      #   product_id: product1
+      #   fee: 10
+      # - type: purchase
+      #   amount: 10
+      #   delay: 25
+      #   buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
+      #   seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
+      #   product_id: product2
+      #   fee: 10
   node2:
     wallet:
       private_key: |
@@ -112,20 +112,20 @@ nodes:
         seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
         product_id: product6
         fee: 2
-      - type: purchase
-        amount: 15
-        delay: 25
-        buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
-        product_id: product7
-        fee: 2
-      - type: purchase
-        amount: 5
-        delay: 30
-        buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
-        product_id: product8
-        fee: 2
+      # - type: purchase
+      #   amount: 5
+      #   delay: 25
+      #   buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
+      #   seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
+      #   product_id: product3
+      #   fee: 2
+      # - type: purchase
+      #   amount: 5
+      #   delay: 30
+      #   buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
+      #   seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
+      #   product_id: product4
+      #   fee: 2
       # - type: review
       #   delay: 10
       #   reviewer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #3
