@@ -7,11 +7,14 @@ import (
 )
 
 func init() {
-	// Register all concrete types used in interfaces
+	// Register all cßoncrete types used in interfaces
 	gob.Register(&PurchaseTransactionData{})
 	gob.Register(&ReviewTransactionData{})
 	gob.Register(&UTXOTransaction{})
-	gob.Register(&BlockHeader{})
+	gob.Register(&CoinbaseTransactionData{})
+	gob.Register(BlockHeader{})
+	gob.Register(&Block{})
+	gob.Register(&Transaction{})
 }
 
 func SerializeTransaction(tx *Transaction) []byte {
@@ -28,7 +31,14 @@ func DeserializeTransaction(data []byte) *Transaction {
 	return &tx
 }
 
-func SerializeBlock(b *BlockHeader) []byte {
+func SerializeBlockHeader(b *BlockHeader) []byte {
+	var buff bytes.Buffer
+	enc := gob.NewEncoder(&buff)
+	enc.Encode(b)
+	return buff.Bytes()
+}
+
+func SerializeBlock(b *Block) []byte {
 	var buff bytes.Buffer
 	enc := gob.NewEncoder(&buff)
 	enc.Encode(b)

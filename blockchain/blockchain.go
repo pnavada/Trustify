@@ -244,6 +244,8 @@ func (bc *Blockchain) ValidateProofOfWork(block *Block, target []byte) bool {
 // ValidateMerkleRoot ensures the block's Merkle root matches the transactions.
 func (bc *Blockchain) ValidateMerkleRoot(block *Block) bool {
 	merkleTree, err := BuildTree(block.Transactions)
+	// logger.InfoLogger.Printf("Received block's merkle root: %v\n", hex.EncodeToString(block.Header.MerkleRoot))
+	// logger.InfoLogger.Printf("Calculated merkle root: %v\n", hex.EncodeToString(merkleTree.Root.Hash))
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to build Merkle tree:", err)
 		return false

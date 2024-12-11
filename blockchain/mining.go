@@ -48,6 +48,8 @@ func (m *Miner) MineBlock(blockSize int) (*Block, error) {
 	previousHash := m.Blockchain.LatestBlock().Header.BlockHash
 	targetHash := m.Blockchain.LatestBlock().Header.TargetHash
 	block, err := NewBlock(transactions, previousHash, targetHash)
+	logger.InfoLogger.Println("Block successfully created for mining")
+	logger.InfoLogger.Printf("Block's merkle root: %v\n", hex.EncodeToString(block.Header.MerkleRoot))
 	if err != nil {
 		logger.ErrorLogger.Printf("Failed to create new block: %v", err)
 		return nil, err
@@ -77,7 +79,7 @@ func (m *Miner) performProofOfWork(block *Block) {
 
 	for {
 		block.Header.Nonce = nonce
-		hash = HashObject(SerializeBlock(&block.Header))
+		hash = HashObject(SerializeBlockHeader(&block.Header))
 		logger.InfoLogger.Printf("Current nonce: %d, Hash: %x", nonce, hash)
 		if bytes.Compare(hash, block.Header.TargetHash) < 0 {
 			// block.Header.BlockHash = hash

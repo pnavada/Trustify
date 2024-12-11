@@ -2,6 +2,7 @@ package network
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
@@ -345,6 +346,7 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 	case MessageTypeBlock:
 		logger.InfoLogger.Printf("Received block from %s\n", message.Sender)
 		block := blockchain.DeserializeBlock(payload)
+		logger.InfoLogger.Printf("Received block: %v\n", block)
 		if block == nil {
 			logger.ErrorLogger.Printf("Failed to deserialize block from %s\n", message.Sender)
 			return
@@ -362,6 +364,7 @@ func (n *Node) BroadcastBlock(block *blockchain.Block) {
 
 	// Print block data
 	logger.InfoLogger.Printf("Broadcasting block: %+v\n", block)
+	logger.InfoLogger.Printf("Block's merkle root: %v\n", hex.EncodeToString(block.Header.MerkleRoot))
 
 	// Network broadcasting
 	err := SendBlock(block)
