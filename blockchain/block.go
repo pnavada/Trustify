@@ -17,7 +17,7 @@ type BlockHeader struct {
 
 // Block represents a complete blockchain block.
 type Block struct {
-	Header           BlockHeader    // Metadata of the block
+	Header           *BlockHeader   // Metadata of the block
 	TransactionCount int            // Total number of transactions in the block
 	Transactions     []*Transaction // List of transactions in the block
 }
@@ -56,7 +56,7 @@ func NewBlock(transactions []*Transaction, previousHash []byte, targetHash []byt
 
 	// Create the block
 	block := &Block{
-		Header:           header,
+		Header:           &header,
 		TransactionCount: len(transactions),
 		Transactions:     transactions,
 	}
@@ -71,8 +71,8 @@ func NewBlock(transactions []*Transaction, previousHash []byte, targetHash []byt
 
 // computeBlockHash calculates the hash of a block using its header and transaction data.
 func computeBlockHash(block *Block) []byte {
-	serializedBlock := SerializeBlockHeader(&block.Header) // Serialize block data
-	return HashObject(serializedBlock)                     // Compute the hash
+	serializedBlock := SerializeBlockHeader(block.Header) // Serialize block data
+	return HashObject(serializedBlock)                    // Compute the hash
 }
 
 // GetTransactionFee calculates the total transaction fees in a block.

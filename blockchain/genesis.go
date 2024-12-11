@@ -92,7 +92,7 @@ func convertConfigGenesisBlockToBlock(genesisConfig *config.ConfigGenesisBlock) 
 
 	// Create the Block
 	block := &Block{
-		Header:           header,
+		Header:           &header,
 		TransactionCount: len(transactions),
 		Transactions:     blockTransactions,
 	}

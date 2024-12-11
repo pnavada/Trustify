@@ -131,13 +131,7 @@ func ReceiveMessages(readChannel chan InboundMessage) error {
 
 	buffer := make([]byte, 4096) // Adjust buffer size as needed
 	for {
-		n, remoteAddr, _ := conn.ReadFrom(buffer)
-
-		// Log remote address hostname
-		remoteHost, _, err := net.SplitHostPort(remoteAddr.String())
-		if err == nil {
-			logger.InfoLogger.Printf("HOSTNAME %s\n", remoteHost)
-		}
+		n, remoteAddr, err := conn.ReadFrom(buffer)
 
 		if err != nil {
 			logger.ErrorLogger.Printf("Error reading from UDP connection: %v\n", err)

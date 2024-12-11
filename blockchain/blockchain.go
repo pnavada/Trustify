@@ -237,6 +237,8 @@ func (bc *Blockchain) ValidateProofOfWork(block *Block, target []byte) bool {
 	isValid := bytes.Compare(hash, target) < 0
 	if !isValid {
 		logger.InfoLogger.Printf("Proof of work failed for block %x\n", block.Header.BlockHash)
+		// Print both the hash for debugging
+		logger.InfoLogger.Printf("Block's hash: %x, Target hash: %x\n", hash, target)
 	}
 	return isValid
 }
@@ -257,6 +259,8 @@ func (bc *Blockchain) ValidateMerkleRoot(block *Block) bool {
 func (bc *Blockchain) ValidateTimestamp(block *Block) bool {
 	lastBlock := bc.LatestBlock()
 	isValid := block.Header.Timestamp > lastBlock.Header.Timestamp
+	// Print both timestamps for debugging
+	logger.InfoLogger.Printf("Last block timestamp: %d, Current block timestamp: %d\n", lastBlock.Header.Timestamp, block.Header.Timestamp)
 	if !isValid {
 		logger.ErrorLogger.Println("Block timestamp is invalid.")
 	}
@@ -272,7 +276,7 @@ func (bc *Blockchain) ComputeHash(block *Block) []byte {
 func (bc *Blockchain) CommitBlock() {
 	numBlocks := len(bc.Ledger)
 	if numBlocks <= bc.ConfirmationDepth {
-		logger.ErrorLogger.Println("Not enough blocks to commit.")
+		logger.InfoLogger.Println("Not enough blocks to commit.")
 		return
 	}
 

@@ -79,7 +79,7 @@ func (m *Miner) performProofOfWork(block *Block) {
 
 	for {
 		block.Header.Nonce = nonce
-		hash = HashObject(SerializeBlockHeader(&block.Header))
+		hash = HashObject(SerializeBlockHeader(block.Header))
 		logger.InfoLogger.Printf("Current nonce: %d, Hash: %x", nonce, hash)
 		if bytes.Compare(hash, block.Header.TargetHash) < 0 {
 			// block.Header.BlockHash = hash
