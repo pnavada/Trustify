@@ -73,7 +73,7 @@ nodes:
         delay: 50
         buyer_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
         seller_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
-        product_id: product1
+        product_id: product2
         fee: 10
       - type: review
         delay: 80
@@ -94,7 +94,7 @@ nodes:
         delay: 5
         buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
         seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #1
-        product_id: product5
+        product_id: product3
         fee: 2
   node3:
     wallet:
@@ -110,7 +110,7 @@ nodes:
         delay: 10
         buyer_address: 00cc1f12d32fce22ad0a15fc7ffe67eb9f4003f081ee297450 #3
         seller_address: 00508b6411f3fea956d121d79a27bb5316d779e98d6341719b #5
-        product_id: product3
+        product_id: product4
         fee: 2
   node4:
     wallet:
