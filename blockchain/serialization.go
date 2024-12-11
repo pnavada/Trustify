@@ -7,12 +7,12 @@ import (
 )
 
 func init() {
-	// Register all cßoncrete types used in interfaces
+	// Register all concrete types used in interfaces
 	gob.Register(&PurchaseTransactionData{})
 	gob.Register(&ReviewTransactionData{})
 	gob.Register(&UTXOTransaction{})
 	gob.Register(&CoinbaseTransactionData{})
-	gob.Register(BlockHeader{})
+	gob.Register(&BlockHeader{})
 	gob.Register(&Block{})
 	gob.Register(&Transaction{})
 }

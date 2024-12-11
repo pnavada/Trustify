@@ -1,8 +1,11 @@
 package blockchain
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"sort"
 	"trustify/logger"
 )
 
@@ -37,10 +40,16 @@ func BuildTree(transactions []*Transaction) (*MerkleTree, error) {
 		return nil, errors.New("cannot build Merkle tree with zero transactions")
 	}
 
+	// Sort transactions deterministically by their IDs (hashes)
+	sort.Slice(transactions, func(i, j int) bool {
+		return bytes.Compare(transactions[i].ID, transactions[j].ID) < 0
+	})
+
 	// Hash each transaction to create leaf nodes
 	var leaves []*MerkleNode
 	for i, tx := range transactions {
-		hash := sha256.Sum256(SerializeTransaction(tx))
+		serializedTx := SerializeTransaction(tx)
+		hash := sha256.Sum256(serializedTx)
 		if len(hash) == 0 {
 			logger.ErrorLogger.Printf("Failed to hash transaction at index %d\n", i)
 			return nil, errors.New("failed to hash transaction")
@@ -63,7 +72,7 @@ func BuildTree(transactions []*Transaction) (*MerkleTree, error) {
 
 	// Construct the Merkle Tree object
 	tree := &MerkleTree{Root: root}
-	logger.InfoLogger.Println("Merkle tree built successfully with root hash:", root.Hash)
+	logger.InfoLogger.Println("Merkle tree built successfully with root hash:", hex.EncodeToString(root.Hash))
 	return tree, nil
 }
 
@@ -83,26 +92,14 @@ func buildMerkleTree(nodes []*MerkleNode) (*MerkleNode, error) {
 
 	// Iterate through the current level of nodes
 	for i := 0; i < len(nodes); i += 2 {
-		var left = nodes[i]
+		left := nodes[i]
 		var right *MerkleNode
-
-		// Ensure the left node has a valid hash
-		if len(left.Hash) == 0 {
-			logger.ErrorLogger.Printf("Invalid hash for left node at index %d\n", i)
-			return nil, errors.New("invalid hash in Merkle tree node")
-		}
 
 		// Handle odd number of nodes by duplicating the last node
 		if i+1 < len(nodes) {
 			right = nodes[i+1]
 		} else {
 			right = nodes[i]
-		}
-
-		// Ensure the right node has a valid hash
-		if len(right.Hash) == 0 {
-			logger.ErrorLogger.Printf("Invalid hash for right node at index %d\n", i+1)
-			return nil, errors.New("invalid hash in Merkle tree node")
 		}
 
 		// Compute the parent hash
@@ -118,13 +115,7 @@ func buildMerkleTree(nodes []*MerkleNode) (*MerkleNode, error) {
 	}
 
 	// Recursively build the next level
-	root, err := buildMerkleTree(parentLevel)
-	if err != nil {
-		logger.ErrorLogger.Println("Failed to build next level of Merkle tree:", err)
-		return nil, err
-	}
-
-	return root, nil
+	return buildMerkleTree(parentLevel)
 }
 
 func (mt *MerkleTree) GetRoot() []byte {

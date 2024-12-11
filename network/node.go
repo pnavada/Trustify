@@ -331,12 +331,6 @@ func (n *Node) handleIncomingMessage(message InboundMessage) {
 	switch messageType {
 	case MessageTypeTransaction:
 		logger.InfoLogger.Printf("Received transaction from %s\n", message.Sender)
-		hostname, err := net.LookupAddr(message.Sender.String())
-		if err != nil {
-			logger.ErrorLogger.Printf("Failed to lookup hostname for %s: %v\n", message.Sender, err)
-		} else {
-			logger.InfoLogger.Printf("Transaction received from hostname: %s\n", hostname[0])
-		}
 		tx, signature, publicKey, err := deserializeTransactionMessage(payload)
 		if err != nil {
 			logger.ErrorLogger.Printf("Failed to deserialize transaction from %s\n", message.Sender)
