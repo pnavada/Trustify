@@ -355,6 +355,7 @@ func (bc *Blockchain) CommitBlock() {
 				for _, tx := range tempTransactions {
 					bc.UTXOSet.Add(tx)
 				}
+				return
 			}
 		}
 

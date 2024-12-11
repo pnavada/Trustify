@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"fmt"
 	"trustify/logger"
 )
 
@@ -71,11 +72,20 @@ func SerializeBlock(b *Block) []byte {
 	return buff.Bytes()
 }
 
-func DeserializeBlock(data []byte) *Block {
+func DeserializeBlock(data []byte) (*Block, error) {
 	var b Block
 	dec := gob.NewDecoder(bytes.NewReader(data))
-	dec.Decode(&b)
-	return &b
+	err := dec.Decode(&b)
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to deserialize block: %v\n", err)
+		return nil, err
+	}
+	if b.Header == nil {
+		logger.ErrorLogger.Println("Deserialized block has nil Header")
+		return nil, fmt.Errorf("block header is nil")
+	}
+	// Additional validation if necessary
+	return &b, nil
 }
 
 func HashObject(serializedData []byte) []byte {
