@@ -103,14 +103,14 @@ nodes:
         delay: 5
         buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
         seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
-        product_id: product3
+        product_id: product5
         fee: 2
       - type: purchase
-        amount: 5
+        amount: 10
         delay: 10
         buyer_address: 0030456b55986f5eddb0fcffd7bf3968e9ad20a335d30a24f9 #2
         seller_address: 00288852597a4a915452b9ecca456eab3dcf47e151d97b5c65 #4
-        product_id: product4
+        product_id: product6
         fee: 2
       # - type: purchase
       #   amount: 5
