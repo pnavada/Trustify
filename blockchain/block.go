@@ -62,10 +62,10 @@ func NewBlock(transactions []*Transaction, previousHash []byte, targetHash []byt
 	}
 
 	// Compute the block hash and update the block header
-	blockHash := computeBlockHash(block)
-	block.Header.BlockHash = blockHash
+	// blockHash :=
+	// block.Header.BlockHash = blockHash
 
-	logger.InfoLogger.Printf("New block created with hash: %x", blockHash)
+	logger.InfoLogger.Printf("New block created with hash: %x", computeBlockHash(block))
 	return block, nil
 }
 

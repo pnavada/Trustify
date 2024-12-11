@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"sort"
 	"trustify/config"
@@ -29,6 +30,7 @@ func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *
 	}
 
 	logger.InfoLogger.Printf("Genesis Block Initialized: %+v\n", block)
+	targetHash, _ := hex.DecodeString(blockchainSettings.TargetHash)
 
 	bc := &Blockchain{
 		Ledger:            []*Block{block},
@@ -36,7 +38,7 @@ func NewBlockchain(genesisBlock *config.ConfigGenesisBlock, blockchainSettings *
 		ReviewReward:      blockchainSettings.ReviewReward,
 		ConfirmationDepth: blockchainSettings.BlockConfirmationDepth,
 		UTXOSet:           utxoSet,
-		TargetHash:        []byte(blockchainSettings.TargetHash),
+		TargetHash:        targetHash,
 		GetBlocksProtocol: getBlocksProtocol,
 		Mempool:           mempool,
 	}
@@ -303,7 +305,7 @@ func (bc *Blockchain) ValidateTimestamp(block *Block) bool {
 
 // ComputeHash calculates the hash of the block's header.
 func (bc *Blockchain) ComputeHash(block *Block) []byte {
-	return HashObject(Serialize(block.Header))
+	return HashObject(SerializeBlockHeader(block.Header))
 }
 
 // CommitBlock commits blocks that have reached the confirmation depth.
