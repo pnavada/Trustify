@@ -80,15 +80,11 @@ func (mp *Mempool) RemoveTransaction(tx *Transaction) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
-	txID := string(tx.ID)
-	if _, exists := mp.TxMap[txID]; exists {
-		for i, t := range *mp.Transactions {
-			if bytes.Equal(t.ID, tx.ID) {
-				heap.Remove(mp.Transactions, i)
-				delete(mp.TxMap, txID)
-				logger.InfoLogger.Printf("Transaction removed from mempool: %x, Pool size: %d\n", tx.ID, mp.Transactions.Len())
-				break
-			}
+	for i, t := range *mp.Transactions {
+		if bytes.Equal(t.ID, tx.ID) {
+			heap.Remove(mp.Transactions, i)
+			logger.InfoLogger.Printf("Transaction removed from mempool: %x, Pool size: %d\n", tx.ID, mp.Transactions.Len())
+			break
 		}
 	}
 }
