@@ -36,8 +36,6 @@ services:
     privileged: true
     networks:
       - network1
-      - network2
-
 
 networks:
   network1:
