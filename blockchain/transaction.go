@@ -45,12 +45,6 @@ func (tx *Transaction) GetTransactionFee() int {
 }
 
 func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID string) *Transaction {
-	// Create a new purchase transaction
-	// For a purchase transaction, the user's wallet contains the list of unspent tranactions used for spending
-	// The amount is the amount to be spent
-	// The fee is the transaction fee
-	// Note that the amount does not include the transaction fee
-
 	// Create inputs from UTXOs
 	inputs, change, err := w.CreateInputs(amount + fee)
 	if err != nil {

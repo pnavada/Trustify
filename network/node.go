@@ -38,19 +38,7 @@ type Node struct {
 }
 
 // Context - blockchain package files
-
 func NewNode(cfg *config.Config) *Node {
-	// Initialize node with wallet, blockchain, mempool, UTXOSet
-	// The node's wallet is initialized using the public key, private key and bitcoin address
-	// from the configuration
-	// The node's blockchain should be initialized with the genesis block
-	// from the configuration file
-	// The rewards should be added to wallet as unspent transaction outputs
-	// The transaction id is the hash of the genesis block combined with the index
-	// The UTXOSet is initialized with the genesis block's transactions
-	// The miner is initialized with the node's blockchain and mempool
-	// The peers are the list of nodes except the host under the nodes section of the configuration
-
 	me, err := os.Hostname()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to get hostname:", err)
@@ -60,7 +48,7 @@ func NewNode(cfg *config.Config) *Node {
 	utxoSet := blockchain.NewUTXOSet()
 
 	cfgNode := cfg.Nodes[me]
-	wallet, err := blockchain.NewWallet(cfgNode.Wallet.PrivateKey) // Need to get self private key
+	wallet, err := blockchain.NewWallet(cfgNode.Wallet.PrivateKey)
 
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to initialize wallet:", err)
@@ -68,7 +56,7 @@ func NewNode(cfg *config.Config) *Node {
 	}
 
 	mempool := blockchain.NewMempool()
-	host, err := libp2p.New() // TODO: Verify if this is the correct way to initialize host
+	host, err := libp2p.New() // TODO: Chec if there is better way of initializing host
 
 	// Initialize peers
 	for peerName, _ := range cfg.Nodes {
@@ -291,12 +279,6 @@ func (n *Node) StartMining() {
 }
 
 func (n *Node) Start() {
-	// Start node operations: networking, transaction processing, mining - concurrent
-	// A node should start listening for incoming transactions and blocks on a specified port
-	// The node should create an outgoing connection to broadcast data over the network
-	// The nodes should start mining to add new blocks to blockchain
-	// Add additional methods or files as needed maintaining separation of concerns
-
 	n.Blockchain.GetBlocksProtocol.Host.SetStreamHandler(blockchain.GetBlocksProtocolID, n.HandleGetBlocksRequest)
 
 	// Start networking, transaction processing, mining
@@ -326,9 +308,11 @@ func (n *Node) Start() {
 }
 
 func (n *Node) PrintLedger() {
-	// Wait for 3 min and then print the ledger
-	time.Sleep(3 * time.Minute)
-	n.Blockchain.PrintLedger()
+	// Print ledger every 5 minutes
+	for {
+		time.Sleep(5 * time.Minute)
+		n.Blockchain.PrintLedger()
+	}
 }
 
 func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {

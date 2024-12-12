@@ -9,12 +9,6 @@ import (
 	"trustify/logger"
 )
 
-// import ()
-
-// Refer https://pkg.go.dev/github.com/wealdtech/go-merkletree#readme-maintainers and use the same for implementation under the hood
-
-// TO-DO: Return meaningful errors for invalid inputs, such as empty transactions or malformed proofs.
-
 type MerkleTree struct {
 	Root *MerkleNode
 }
@@ -26,14 +20,6 @@ type MerkleNode struct {
 }
 
 func BuildTree(transactions []*Transaction) (*MerkleTree, error) {
-	// Construct a Merkle Tree from a list of transactions.
-	// Compute the Merkle Root, representing the cryptographic hash of all transactions.
-	// Hash each transaction in the provided transactions list to generate the leaf nodes.
-	// Pair up the leaf nodes and hash their concatenated values to create parent nodes.
-	// Repeat this process until only one root node remains.
-	// If the number of nodes in a level is odd, duplicate the last node to form a pair.
-	// Return the constructed MerkleTree object with the root node.
-
 	// Validate the input
 	if len(transactions) == 0 {
 		logger.ErrorLogger.Println("No transactions provided to build the Merkle tree")
@@ -119,10 +105,6 @@ func buildMerkleTree(nodes []*MerkleNode) (*MerkleNode, error) {
 }
 
 func (mt *MerkleTree) GetRoot() []byte {
-	// Retrieve the Merkle Root of the tree.
-	// Return the Hash value of the root node (mt.Root).
-	// If the tree is empty (mt.Root == nil), return a nil value.
-	// Ensure the tree has been constructed before accessing the root.
 	if mt.Root == nil {
 		logger.ErrorLogger.Println("Merkle tree root is nil")
 		return nil
