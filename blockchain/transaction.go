@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"encoding/hex"
 	"sync"
 	"time"
 	"trustify/logger"
@@ -94,7 +95,7 @@ func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID
 	}
 
 	// List down the inputs and outputs for the transaction
-	logger.InfoLogger.Println("Transaction:", tx.ID)
+	logger.InfoLogger.Println("Transaction Created:", hex.EncodeToString(tx.ID))
 	for _, input := range tx.Inputs {
 		logger.InfoLogger.Printf("Input - Address: %x, Amount: %d\n", input.Address, input.Amount)
 	}
