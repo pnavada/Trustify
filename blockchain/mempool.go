@@ -3,6 +3,7 @@ package blockchain
 import (
 	"bytes"
 	"container/heap"
+	"encoding/hex"
 	"sync"
 	"time"
 	"trustify/logger"
@@ -60,7 +61,7 @@ func (mp *Mempool) AddTransaction(tx *Transaction) bool {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
-	txID := string(tx.ID)
+	txID := hex.EncodeToString(tx.ID)
 	if _, exists := mp.TxMap[txID]; exists {
 		logger.InfoLogger.Printf("Transaction already in mempool: %x\n", tx.ID)
 		return false
@@ -94,7 +95,7 @@ func (mp *Mempool) ContainsTransaction(tx *Transaction) bool {
 	mp.Mutex.RLock()
 	defer mp.Mutex.RUnlock()
 
-	_, exists := mp.TxMap[string(tx.ID)]
+	_, exists := mp.TxMap[hex.EncodeToString(tx.ID)]
 	return exists
 }
 
@@ -109,7 +110,7 @@ func (mp *Mempool) GetTransactions(count int) []*Transaction {
 
 	for i := 0; i < count && mp.Transactions.Len() > 0; i++ {
 		tx := heap.Pop(mp.Transactions).(*Transaction)
-		txID := string(tx.ID)
+		txID := hex.EncodeToString(tx.ID)
 
 		// Additional check to prevent duplicate transactions
 		if _, used := usedTxIDs[txID]; used {
@@ -131,6 +132,6 @@ func (mp *Mempool) HasTransaction(tx *Transaction) (*Transaction, bool) {
 	mp.Mutex.RLock()
 	defer mp.Mutex.RUnlock()
 
-	existingTx, exists := mp.TxMap[string(tx.ID)]
+	existingTx, exists := mp.TxMap[hex.EncodeToString(tx.ID)]
 	return existingTx, exists
 }
