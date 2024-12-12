@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"bytes"
 	"container/heap"
 	"encoding/hex"
 	"sync"
@@ -76,20 +75,6 @@ func (mp *Mempool) AddTransaction(tx *Transaction) bool {
 	return true
 }
 
-// RemoveTransaction removes a transaction from the mempool.
-func (mp *Mempool) RemoveTransaction(tx *Transaction) {
-	mp.Mutex.Lock()
-	defer mp.Mutex.Unlock()
-
-	for i, t := range *mp.Transactions {
-		if bytes.Equal(t.ID, tx.ID) {
-			heap.Remove(mp.Transactions, i)
-			logger.InfoLogger.Printf("Transaction removed from mempool: %x, Pool size: %d\n", tx.ID, mp.Transactions.Len())
-			break
-		}
-	}
-}
-
 // ContainsTransaction checks if a transaction exists in the mempool.
 func (mp *Mempool) ContainsTransaction(tx *Transaction) bool {
 	mp.Mutex.RLock()
@@ -120,7 +105,7 @@ func (mp *Mempool) GetTransactions(count int) []*Transaction {
 
 		txs = append(txs, tx)
 		usedTxIDs[txID] = true
-		delete(mp.TxMap, txID)
+		// delete(mp.TxMap, txID)
 
 		logger.InfoLogger.Printf("Transaction fetched for block: %x, Remaining pool size: %d\n", tx.ID, mp.Transactions.Len())
 	}
