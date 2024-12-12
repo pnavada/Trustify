@@ -93,6 +93,17 @@ func NewPurchaseTransaction(w *Wallet, to string, amount int, fee int, productID
 		}
 	}
 
+	// List down the inputs and outputs for the transaction
+	logger.InfoLogger.Println("Transaction:", tx.ID)
+	for _, input := range tx.Inputs {
+		logger.InfoLogger.Printf("Input - Address: %x, Amount: %d\n", input.Address, input.Amount)
+	}
+
+	logger.InfoLogger.Println("Transaction Outputs:")
+	for _, output := range tx.Outputs {
+		logger.InfoLogger.Printf("Output - Address: %x, Amount: %d\n", output.Address, output.Amount)
+	}
+
 	logger.InfoLogger.Println("New purchase transaction created:", tx.ID, " with data:", txData)
 	return tx
 }

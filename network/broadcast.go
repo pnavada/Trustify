@@ -215,10 +215,10 @@ func SendBlock(block *blockchain.Block) error {
 		return fmt.Errorf("failed to serialize block")
 	}
 
-	if len(serializedBlock) > 1200 { // Safe threshold below typical MTU
-		logger.ErrorLogger.Printf("Serialized block size %d exceeds 1200 bytes limit", len(serializedBlock))
-		return fmt.Errorf("serialized block size %d exceeds limit", len(serializedBlock))
-	}
+	// if len(serializedBlock) > 1200 { // Safe threshold below typical MTU
+	// 	logger.ErrorLogger.Printf("Serialized block size %d exceeds 1200 bytes limit", len(serializedBlock))
+	// 	return fmt.Errorf("serialized block size %d exceeds limit", len(serializedBlock))
+	// }
 
 	// Construct the message with the type header and length
 	var buf bytes.Buffer
