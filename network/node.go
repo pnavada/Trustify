@@ -217,10 +217,13 @@ func (n *Node) syncWalletWithUTXOSet() {
 	// Temporary map to store updated UTXOs
 	updatedUTXOsMap := make(map[string]*blockchain.UTXOTransaction)
 
-	// Iterate over all UTXOs in the UTXOSet
-	for _, utxo := range n.UTXOSet.UTXOs {
-		if bytes.Equal(utxo.Address, n.Wallet.BitcoinAddress) {
-			updatedUTXOsMap[utxo.ID.String()] = utxo
+	// Ensure UTXOSet is not nil
+	if n.UTXOSet != nil {
+		// Iterate over all UTXOs in the UTXOSet
+		for _, utxo := range n.UTXOSet.UTXOs {
+			if bytes.Equal(utxo.Address, n.Wallet.BitcoinAddress) {
+				updatedUTXOsMap[utxo.ID.String()] = utxo
+			}
 		}
 	}
 
