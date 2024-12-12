@@ -317,7 +317,15 @@ func (n *Node) Start() {
 
 	go n.SyncWallet()
 
+	go n.PrintLedger()
+
 	n.HandleMessages()
+}
+
+func (n *Node) PrintLedger() {
+	// Wait for 3 min and then print the ledger
+	time.Sleep(3 * time.Minute)
+	n.Blockchain.PrintLedger()
 }
 
 func (n *Node) handleConfigTransaction(tx config.ConfigTransaction) {

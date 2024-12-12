@@ -86,6 +86,11 @@ func (u *UTXOSet) Get(id *UTXOTransactionID) (*UTXOTransaction, bool) {
 	utxo, exists := u.UTXOs[key]
 	if !exists {
 		logger.InfoLogger.Println("UTXO not found:", key)
+		logger.InfoLogger.Println("Expected UTXO:", id)
+		logger.InfoLogger.Println("Available UTXOs:")
+		for k := range u.UTXOs {
+			logger.InfoLogger.Println(k)
+		}
 		return nil, false
 	}
 	return utxo, true

@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"os"
 	"sort"
+	"time"
 	"trustify/config"
 	"trustify/logger"
 )
@@ -550,4 +553,77 @@ func (bc *Blockchain) GetBlocksSinceHash(lastKnownHash []byte) ([]*Block, error)
 	}
 
 	return blocks[startIndex:], nil
+}
+
+func (bc *Blockchain) PrintLedger() {
+	fmt.Println("===== BLOCKCHAIN LEDGER =====")
+	fmt.Printf("Total Blocks: %d\n", len(bc.Ledger))
+	fmt.Println("==============================")
+
+	for i, block := range bc.Ledger {
+		fmt.Printf("\n BLOCK #%d \n", i)
+		fmt.Println("------------------------------")
+
+		// Print Block Header Information
+		fmt.Println("BLOCK HEADER:")
+		if block.Header != nil {
+			fmt.Printf("  Block Hash:     %x\n", block.Header.BlockHash)
+			fmt.Printf("  Previous Hash:  %x\n", block.Header.PreviousHash)
+			fmt.Printf("  Merkle Root:    %x\n", block.Header.MerkleRoot)
+			fmt.Printf("  Timestamp:      %s\n", time.Unix(block.Header.Timestamp, 0))
+			fmt.Printf("  Target Hash:    %x\n", block.Header.TargetHash)
+			fmt.Printf("  Nonce:          %d\n", block.Header.Nonce)
+		} else {
+			fmt.Println("  [HEADER MISSING]")
+		}
+
+		// Print Transaction Information
+		fmt.Printf("\nTRANSACTIONS (Total: %d):\n", block.TransactionCount)
+		for j, tx := range block.Transactions {
+			fmt.Printf("  Transaction #%d:\n", j)
+			fmt.Printf("    Transaction ID: %x\n", tx.ID)
+			fmt.Printf("    Timestamp:      %s\n", time.Unix(tx.Timestamp, 0))
+			fmt.Printf("    Sequence:       %d\n", tx.Sequence)
+
+			// Print Inputs
+			fmt.Println("    INPUTS:")
+			for k, input := range tx.Inputs {
+				fmt.Printf("      Input #%d:\n", k)
+				fmt.Printf("        Address:  %x\n", input.Address)
+				fmt.Printf("        Amount:   %d\n", input.Amount)
+			}
+
+			// Print Outputs
+			fmt.Println("    OUTPUTS:")
+			for k, output := range tx.Outputs {
+				fmt.Printf("      Output #%d:\n", k)
+				fmt.Printf("        Address:  %x\n", output.Address)
+				fmt.Printf("        Amount:   %d\n", output.Amount)
+			}
+
+			// Print Transaction-Specific Data
+			if purchaseData, ok := tx.Data.(*PurchaseTransactionData); ok {
+				fmt.Println("    PURCHASE DETAILS:")
+				fmt.Printf("      Buyer:     %x\n", purchaseData.BuyerAddress)
+				fmt.Printf("      Seller:    %x\n", purchaseData.SellerAddress)
+				fmt.Printf("      Product:   %s\n", purchaseData.ProductID)
+				fmt.Printf("      Amount:    %d\n", purchaseData.Amount)
+			} else if reviewData, ok := tx.Data.(*ReviewTransactionData); ok {
+				fmt.Println("    REVIEW DETAILS:")
+				fmt.Printf("      Reviewer:  %x\n", reviewData.ReviewerAddress)
+				fmt.Printf("      Rating:    %d\n", reviewData.Rating)
+				fmt.Printf("      Product:   %s\n", reviewData.ProductID)
+			} else if coinbaseData, ok := tx.Data.(*CoinbaseTransactionData); ok {
+				fmt.Println("    COINBASE DETAILS:")
+				fmt.Printf("      Block Height: %d\n", coinbaseData.BlockHeight)
+			}
+
+			fmt.Println()
+		}
+
+		fmt.Println("==============================")
+	}
+
+	fmt.Println("\n===== END OF BLOCKCHAIN LEDGER =====")
+	os.Exit(0)
 }
